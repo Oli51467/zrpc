@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/api/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/api/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/client/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/client/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework/irpc-common/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework/irpc-common/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework/irpc-core/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework/irpc-core/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/manager/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/manager/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/provider/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/provider/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/test/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/test/src/main/resources" charset="UTF-8" />
+  </component>
+</project>

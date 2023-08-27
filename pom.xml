@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.sdu</groupId>
+    <artifactId>iRpc</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+    <modules>
+        <module>test</module>
+        <module>framework</module>
+        <module>framework/irpc-common</module>
+        <module>framework/irpc-core</module>
+        <module>manager</module>
+        <module>client</module>
+        <module>provider</module>
+        <module>api</module>
+    </modules>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <netty.version>4.1.89.Final</netty.version>
+        <junit.version>4.13.2</junit.version>
+        <zookeeper.version>3.8.1</zookeeper.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+
+            <!--Netty-->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-all</artifactId>
+                <version>${netty.version}</version>
+            </dependency>
+
+            <!--junit-->
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <scope>test</scope>
+                <version>${junit.version}</version>
+            </dependency>
+
+            <!--zookeeper-->
+            <dependency>
+                <groupId>org.apache.zookeeper</groupId>
+                <artifactId>zookeeper</artifactId>
+                <version>${zookeeper.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>
