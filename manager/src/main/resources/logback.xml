@@ -10,7 +10,7 @@
     <!-- 定义参数常量 -->
     <property name="log.level" value="debug"/>
     <property name="log.maxHistory" value="30"/>
-    <property name="log.filePath" value="./logs/provider"/>
+    <property name="log.filePath" value="./logs/manager"/>
     <property name="log.pattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS}[%thread]%-5level %logger{50} - %msg%n"/>
 
     <!-- 输出到控制台 -->
@@ -39,11 +39,11 @@
             <pattern>${log.pattern}</pattern>
         </encoder>
         <!--过滤掉不是Debug级别的日志，只记录debug级别的日志-->
-        <!--        <filter class="ch.qos.logback.classic.filter.LevelFilter">-->
-        <!--            <level>DEBUG</level>-->
-        <!--            <onMatch>ACCEPT</onMatch>-->
-        <!--            <onMisMatch>DENY</onMisMatch>-->
-        <!--        </filter>-->
+<!--        <filter class="ch.qos.logback.classic.filter.LevelFilter">-->
+<!--            <level>DEBUG</level>-->
+<!--            <onMatch>ACCEPT</onMatch>-->
+<!--            <onMisMatch>DENY</onMisMatch>-->
+<!--        </filter>-->
     </appender>
 
     <!-- ERROR级别 -->

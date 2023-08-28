@@ -3,3 +3,4 @@ test/target
 **/out
 *.iml
 .idea
+logs
