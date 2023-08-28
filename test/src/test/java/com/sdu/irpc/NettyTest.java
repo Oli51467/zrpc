@@ -45,7 +45,7 @@ public class NettyTest {
 
     @Test
     public void testDecompress() throws IOException {
-        byte[] buf = new byte[]{31, -117, 8, 0, 0, 0, 0, 0, 0, -1, -29, 17, -41, 86, 82, 54, 3, 0, 3, 114, 41, 41, 6, 0, 0, 0};
+        byte[] buf = new byte[]{31, -111, 8, 0, 0, 0, 0, 0, 0, -1, -29, 11, -41, 86, 82, 54, 3, 0, 3, 114, 41, 41, 6, 0, 0, 0};
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(buf);
         GZIPInputStream gzipInputStream = new GZIPInputStream(byteArrayInputStream);
         byte[] bytes = gzipInputStream.readAllBytes();
