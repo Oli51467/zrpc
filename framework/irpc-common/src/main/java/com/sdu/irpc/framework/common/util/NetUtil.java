@@ -12,7 +12,7 @@ import java.util.Enumeration;
 @Slf4j
 public class NetUtil {
 
-    public static String getIp() {
+    public static String getIp(Integer port) {
         try {
             // 获取所有的网卡信息
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
@@ -31,7 +31,7 @@ public class NetUtil {
                     }
                     String ipAddress = addr.getHostAddress();
                     log.info("局域网IP地址：{}", ipAddress);
-                    return ipAddress;
+                    return ipAddress + ":" + port;
                 }
             }
             throw new NetworkException();
@@ -42,7 +42,7 @@ public class NetUtil {
     }
 
     public static void main(String[] args) {
-        String ip = NetUtil.getIp();
+        String ip = NetUtil.getIp(8898);
         System.out.println("ip = " + ip);
     }
 

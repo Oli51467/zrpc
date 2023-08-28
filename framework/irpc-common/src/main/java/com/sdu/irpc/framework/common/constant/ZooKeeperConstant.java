@@ -25,4 +25,8 @@ public class ZooKeeperConstant {
     public static String getProviderNodePath(String serviceName) {
         return getBaseProvidersPath() + SPLIT + serviceName;
     }
+
+    public static String getPath(String parentPath, String path) {
+        return parentPath + SPLIT + path;
+    }
 }
