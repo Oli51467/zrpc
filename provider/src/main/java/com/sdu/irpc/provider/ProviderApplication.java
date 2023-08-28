@@ -13,7 +13,6 @@ import com.sdu.irpc.provider.impl.GreetImpl;
 public class ProviderApplication {
 
     public static void main(String[] args) {
-
         // 1.封装要发布的服务
         ServiceConfig<Greet> service = new ServiceConfig<>();
         service.setInterface(Greet.class);

@@ -1,5 +1,6 @@
 package com.sdu.irpc.framework.common.util;
 
+import com.sdu.irpc.framework.common.constant.ZooKeeperConstant;
 import com.sdu.irpc.framework.common.exception.ZooKeeperException;
 import com.sdu.irpc.framework.common.entity.ZooKeeperNode;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +19,7 @@ public class ZookeeperUtil {
      * @return zookeeper实例
      */
     public static ZooKeeper createZookeeperConnection() {
-        return createZookeeperConnection(Constant.DEFAULT_ZK_CONNECT, Constant.TIME_OUT);
+        return createZookeeperConnection(ZooKeeperConstant.DEFAULT_ZK_CONNECT, ZooKeeperConstant.TIME_OUT);
     }
 
     public static ZooKeeper createZookeeperConnection(String connectionAddr, int timeout) {

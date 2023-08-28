@@ -7,7 +7,7 @@ import org.apache.zookeeper.ZooKeeper;
 
 import java.util.List;
 
-import static com.sdu.irpc.framework.common.util.Constant.*;
+import static com.sdu.irpc.framework.common.constant.ZooKeeperConstant.*;
 
 public class ManagerApplication {
 
@@ -15,8 +15,8 @@ public class ManagerApplication {
         ZooKeeper zooKeeper = ZookeeperUtil.createZookeeperConnection();
         // 定义持久节点和数据
         ZooKeeperNode baseNode = new ZooKeeperNode(BASE_PATH, null);
-        ZooKeeperNode providersNode = new ZooKeeperNode(BaseProvidersPath(), null);
-        ZooKeeperNode clientsNode = new ZooKeeperNode(BaseClientsPath(), null);
+        ZooKeeperNode providersNode = new ZooKeeperNode(getBaseProvidersPath(), null);
+        ZooKeeperNode clientsNode = new ZooKeeperNode(getBaseClientsPath(), null);
         // 创建持久节点
         List.of(baseNode, providersNode, clientsNode).forEach(node -> ZookeeperUtil.createNode(zooKeeper, node, null, CreateMode.PERSISTENT));
         ZookeeperUtil.close(zooKeeper);

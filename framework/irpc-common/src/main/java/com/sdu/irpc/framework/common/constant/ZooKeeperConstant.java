@@ -1,6 +1,6 @@
-package com.sdu.irpc.framework.common.util;
+package com.sdu.irpc.framework.common.constant;
 
-public class Constant {
+public class ZooKeeperConstant {
 
     // zookeeper的默认连接地址
     public static final String DEFAULT_ZK_CONNECT = "127.0.0.1:2181";
@@ -12,12 +12,17 @@ public class Constant {
     public static final String BASE_PATH = "/irpc-metadata";
     public static final String BASE_PROVIDERS_PATH = "/providers";
     public static final String BASE_CLIENTS_PATH = "/clients";
+    public static final String SPLIT = "/";
 
-    public static String BaseProvidersPath() {
+    public static String getBaseProvidersPath() {
         return BASE_PATH + BASE_PROVIDERS_PATH;
     }
 
-    public static String BaseClientsPath() {
+    public static String getBaseClientsPath() {
         return BASE_PATH + BASE_CLIENTS_PATH;
+    }
+
+    public static String getProviderNodePath(String serviceName) {
+        return getBaseProvidersPath() + SPLIT + serviceName;
     }
 }

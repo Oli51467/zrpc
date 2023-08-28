@@ -32,6 +32,12 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.sdu</groupId>
+            <artifactId>irpc-common</artifactId>
+            <version>1.0</version>
+        </dependency>
     </dependencies>
 
 </project>
