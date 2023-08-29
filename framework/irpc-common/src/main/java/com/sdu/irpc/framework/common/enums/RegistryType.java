@@ -6,13 +6,11 @@ import lombok.Getter;
 public enum RegistryType {
 
     ZOOKEEPER("zookeeper"),
-    NACOS("nacos")
-        ;
+    NACOS("nacos");
 
     RegistryType(String name) {
         this.name = name;
     }
 
-    private String name;
-
+    private final String name;
 }

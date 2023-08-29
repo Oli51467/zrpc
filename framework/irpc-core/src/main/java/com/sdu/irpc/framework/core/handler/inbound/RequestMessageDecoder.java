@@ -1,6 +1,7 @@
 package com.sdu.irpc.framework.core.handler.inbound;
 
 import com.sdu.irpc.framework.common.constant.MessageConstant;
+import com.sdu.irpc.framework.common.enums.RequestType;
 import com.sdu.irpc.framework.common.exception.ProtocolException;
 import com.sdu.irpc.framework.core.compression.Compressor;
 import com.sdu.irpc.framework.core.compression.CompressorFactory;
@@ -34,6 +35,7 @@ public class RequestMessageDecoder extends LengthFieldBasedFrameDecoder implemen
     @Override
     protected Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
         /*
+         * super方法已经将二进制流读成ByteBuf
          * 先根据提供的长度偏移和长度域长度读取数据包的长度
          * 根据数据包的长度+偏移量长度计算出本次需要读取的总数据包的长度
          * 根据设置的跳过数据的长度计算有效的护数据长度
@@ -81,6 +83,10 @@ public class RequestMessageDecoder extends LengthFieldBasedFrameDecoder implemen
         request.setCompressionType(compressionType);
         request.setSerializationType(serializationType);
         request.setTimeStamp(timeStamp);
+        // 心跳请求不处理
+        if (requestType == RequestType.HEART_BEAT.getCode()) {
+            return request;
+        }
         int payloadLength = fullLength - headerLength;
         byte[] payload = new byte[payloadLength];
         byteBuf.readBytes(payload);

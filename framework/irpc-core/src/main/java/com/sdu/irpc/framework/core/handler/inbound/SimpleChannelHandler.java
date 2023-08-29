@@ -15,5 +15,6 @@ public class SimpleChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
         String result = o.toString(Charset.defaultCharset());
         CompletableFuture<Object> completableFuture = IRpcBootstrap.PENDING_REQUEST.get(1L);
         completableFuture.complete(result);
+        IRpcBootstrap.PENDING_REQUEST.remove(1L);
     }
 }

@@ -1,10 +1,13 @@
 package com.sdu.irpc.framework.core.proxy;
 
+import com.sdu.irpc.framework.common.enums.RequestType;
 import com.sdu.irpc.framework.common.exception.DiscoveryException;
 import com.sdu.irpc.framework.common.exception.NetworkException;
 import com.sdu.irpc.framework.core.IRpcBootstrap;
 import com.sdu.irpc.framework.core.NettyBoostrapInitializer;
+import com.sdu.irpc.framework.core.compression.CompressorFactory;
 import com.sdu.irpc.framework.core.registration.Registry;
+import com.sdu.irpc.framework.core.serialization.SerializationFactory;
 import com.sdu.irpc.framework.core.transport.RequestPayload;
 import com.sdu.irpc.framework.core.transport.RpcRequest;
 import io.netty.channel.Channel;
@@ -46,9 +49,9 @@ public class RpcClientInvocationHandler implements InvocationHandler {
         // 2.创建一个请求
         RpcRequest request = RpcRequest.builder()
                 .requestId(1L)
-                .compressionType((byte) 1)
-                .requestType((byte) 1)
-                .serializationType((byte) 1)
+                .compressionType(CompressorFactory.getCompressor(IRpcBootstrap.getInstance().getConfiguration().getCompressionType()).getCode())
+                .requestType(RequestType.REQUEST.getCode())
+                .serializationType(SerializationFactory.getSerializer(IRpcBootstrap.getInstance().getConfiguration().getSerializationType()).getCode())
                 .timeStamp(System.currentTimeMillis())
                 .requestPayload(requestPayload)
                 .build();

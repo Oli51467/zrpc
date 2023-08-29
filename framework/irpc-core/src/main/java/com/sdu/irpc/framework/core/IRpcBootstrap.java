@@ -5,10 +5,9 @@ import com.sdu.irpc.framework.core.config.ReferenceConfig;
 import com.sdu.irpc.framework.core.config.RegistryConfig;
 import com.sdu.irpc.framework.core.config.ServiceConfig;
 import com.sdu.irpc.framework.core.handler.inbound.HttpHeadersHandler;
+import com.sdu.irpc.framework.core.handler.inbound.MethodInvokeHandler;
 import com.sdu.irpc.framework.core.handler.inbound.RequestMessageDecoder;
-import com.sdu.irpc.framework.core.transport.RpcRequest;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
@@ -84,7 +83,7 @@ public class IRpcBootstrap {
      * @return this当前实例
      */
     public IRpcBootstrap serialize(String serializeType) {
-        configuration.setSerialization(serializeType);
+        configuration.setSerializationType(serializeType);
         log.info("当前工程使用了：{}协议进行序列化", serializeType);
         return this;
     }
@@ -97,7 +96,7 @@ public class IRpcBootstrap {
      * @return this当前实例
      */
     public IRpcBootstrap compression(String compression) {
-        configuration.setCompression(compression);
+        configuration.setCompressionType(compression);
         log.info("当前工程使用了：{}进行压缩", compression);
         return this;
     }
@@ -136,15 +135,9 @@ public class IRpcBootstrap {
                                     .addLast(new LoggingHandler(LogLevel.DEBUG))
                                     .addLast(new ChunkedWriteHandler())
                                     .addLast(new HttpObjectAggregator(8192))
-                                    .addLast(new HttpHeadersHandler())
-                                    .addLast(new RequestMessageDecoder())
-                                    .addLast(new SimpleChannelInboundHandler<RpcRequest>() {
-                                        @Override
-                                        protected void channelRead0(ChannelHandlerContext channelHandlerContext, RpcRequest msg) throws Exception {
-                                            log.info("收到数据: {}", msg.toString());
-                                            channelHandlerContext.channel().writeAndFlush(Unpooled.copiedBuffer("back".getBytes()));
-                                        }
-                                    })
+                                    .addLast(new HttpHeadersHandler())      // 解析http头部
+                                    .addLast(new RequestMessageDecoder())   // 消息解码
+                                    .addLast(new MethodInvokeHandler())     // 反射调用方法
                             ;
                         }
                     });

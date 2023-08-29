@@ -14,9 +14,9 @@ public class Configuration implements DefaultBoostrapConfig {
 
     private String groupName = DEFAULT_GROUP_NAME;
 
-    private String serialization = DEFAULT_SERIALIZATION;
+    private String serializationType = DEFAULT_SERIALIZATION;
 
-    private String compression = DEFAULT_COMPRESSION;
+    private String compressionType = DEFAULT_COMPRESSION;
 
     private RegistryConfig registryConfig = new RegistryConfig(DEFAULT_REGISTRY_CONFIG);
 }

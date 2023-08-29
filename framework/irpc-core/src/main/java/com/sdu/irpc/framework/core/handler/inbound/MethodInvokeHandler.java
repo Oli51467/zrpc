@@ -1,0 +1,68 @@
+package com.sdu.irpc.framework.core.handler.inbound;
+
+import com.sdu.irpc.framework.common.enums.RespCode;
+import com.sdu.irpc.framework.core.IRpcBootstrap;
+import com.sdu.irpc.framework.core.config.ServiceConfig;
+import com.sdu.irpc.framework.core.transport.RequestPayload;
+import com.sdu.irpc.framework.core.transport.RpcRequest;
+import com.sdu.irpc.framework.core.transport.RpcResponse;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
+import lombok.extern.slf4j.Slf4j;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+@Slf4j
+public class MethodInvokeHandler extends SimpleChannelInboundHandler<RpcRequest> {
+
+    @Override
+    protected void channelRead0(ChannelHandlerContext channelHandlerContext, RpcRequest request) {
+        log.info("收到数据: {}", request.toString());
+
+        // 封装响应体
+        RpcResponse response = new RpcResponse();
+        response.setRequestId(request.getRequestId());
+        response.setCompressionType(response.getCompressionType());
+        response.setSerializationType(response.getSerializationType());
+        // 获得通道
+        Channel channel = channelHandlerContext.channel();
+        // 拿到真正的payload
+        RequestPayload requestPayload = request.getRequestPayload();
+        try {
+            Object result = doInvoke(requestPayload);
+            log.info("请求【{}】已经在服务端完成方法调用。", request.getRequestId());
+            response.setCode(RespCode.SUCCESS.getCode());
+            response.setBody(result);
+        } catch (Exception e) {
+            log.error("Id为【{}】的请求在调用过程中发生异常。", response.getRequestId(), e);
+            response.setCode(RespCode.FAIL.getCode());
+        }
+        log.info("服务提供方响应体: {}", response);
+        // 写回响应
+        channel.writeAndFlush(response);
+    }
+
+    private Object doInvoke(RequestPayload requestPayload) {
+        String targetInterfaceName = requestPayload.getInterfaceName();
+        String methodName = requestPayload.getMethodName();
+        Class<?>[] parametersType = requestPayload.getParametersType();
+        Object[] parametersValue = requestPayload.getParametersValue();
+
+        // 寻找服务的具体实现
+        ServiceConfig<?> serviceConfig = IRpcBootstrap.SERVICE_MAP.get(targetInterfaceName);
+        Object referenceImpl = serviceConfig.getReference();
+        // 获取方法对象 通过反射调用invoke方法
+        Object returnValue;
+        try {
+            Class<?> clazz = referenceImpl.getClass();
+            Method method = clazz.getMethod(methodName, parametersType);
+            returnValue = method.invoke(referenceImpl, parametersValue);
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            log.error("调用服务【{}】的方法【{}】时发生了异常。", targetInterfaceName, methodName, e);
+            throw new RuntimeException(e);
+        }
+        return returnValue;
+    }
+}
