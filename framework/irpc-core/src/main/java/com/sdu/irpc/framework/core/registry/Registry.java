@@ -1,4 +1,4 @@
-package com.sdu.irpc.framework.core.registration;
+package com.sdu.irpc.framework.core.registry;
 
 import com.sdu.irpc.framework.core.config.ServiceConfig;
 

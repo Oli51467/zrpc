@@ -1,10 +1,10 @@
 package com.sdu.irpc.framework.core.handler.outbound;
 
 import com.sdu.irpc.framework.common.constant.MessageConstant;
-import com.sdu.irpc.framework.core.compression.Compressor;
-import com.sdu.irpc.framework.core.compression.CompressorFactory;
-import com.sdu.irpc.framework.core.serialization.SerializationFactory;
-import com.sdu.irpc.framework.core.serialization.Serializer;
+import com.sdu.irpc.framework.core.compressor.Compressor;
+import com.sdu.irpc.framework.core.compressor.CompressorFactory;
+import com.sdu.irpc.framework.core.serializer.SerializerFactory;
+import com.sdu.irpc.framework.core.serializer.Serializer;
 import com.sdu.irpc.framework.core.transport.RpcRequest;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -56,7 +56,7 @@ public class RequestMessageEncoder extends MessageToByteEncoder<RpcRequest> impl
         byte[] body = null;
         int bodyLength = 0;
         if (null != rpcRequest.getRequestPayload()) {
-            Serializer serializer = SerializationFactory.getSerializer(rpcRequest.getSerializationType()).getImpl();
+            Serializer serializer = SerializerFactory.getSerializer(rpcRequest.getSerializationType()).getImpl();
             body = serializer.serialize(rpcRequest.getRequestPayload());
             Compressor compressor = CompressorFactory.getCompressor(rpcRequest.getCompressionType()).getImpl();
             body = compressor.compress(body);

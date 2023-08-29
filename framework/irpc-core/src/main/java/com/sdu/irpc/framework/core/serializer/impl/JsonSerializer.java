@@ -1,7 +1,7 @@
-package com.sdu.irpc.framework.core.serialization.impl;
+package com.sdu.irpc.framework.core.serializer.impl;
 
 import com.alibaba.fastjson2.JSON;
-import com.sdu.irpc.framework.core.serialization.Serializer;
+import com.sdu.irpc.framework.core.serializer.Serializer;
 import com.sdu.irpc.framework.core.transport.RequestPayload;
 import lombok.extern.slf4j.Slf4j;
 
@@ -48,8 +48,5 @@ public class JsonSerializer implements Serializer {
 
         RequestPayload deserialize = serializer.deserialize(serialize, RequestPayload.class);
         System.out.println(deserialize);
-
-
     }
-
 }

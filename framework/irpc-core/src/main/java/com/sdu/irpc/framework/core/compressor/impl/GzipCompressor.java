@@ -1,7 +1,7 @@
-package com.sdu.irpc.framework.core.compression.impl;
+package com.sdu.irpc.framework.core.compressor.impl;
 
 import com.sdu.irpc.framework.common.exception.CompressException;
-import com.sdu.irpc.framework.core.compression.Compressor;
+import com.sdu.irpc.framework.core.compressor.Compressor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayInputStream;

@@ -1,4 +1,4 @@
-package com.sdu.irpc.framework.core.registration;
+package com.sdu.irpc.framework.core.registry;
 
 /**
  * 注册中心的共享方法

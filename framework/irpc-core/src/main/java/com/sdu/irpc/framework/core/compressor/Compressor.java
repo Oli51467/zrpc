@@ -1,4 +1,4 @@
-package com.sdu.irpc.framework.core.compression;
+package com.sdu.irpc.framework.core.compressor;
 
 public interface Compressor {
 

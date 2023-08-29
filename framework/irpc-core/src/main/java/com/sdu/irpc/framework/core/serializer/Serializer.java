@@ -1,4 +1,4 @@
-package com.sdu.irpc.framework.core.serialization;
+package com.sdu.irpc.framework.core.serializer;
 
 public interface Serializer {
 

@@ -1,7 +1,7 @@
 package com.sdu.irpc.framework.core.config;
 
 import com.sdu.irpc.framework.core.proxy.RpcClientInvocationHandler;
-import com.sdu.irpc.framework.core.registration.Registry;
+import com.sdu.irpc.framework.core.registry.Registry;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 

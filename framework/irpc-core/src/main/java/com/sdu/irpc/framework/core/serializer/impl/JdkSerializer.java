@@ -1,7 +1,7 @@
-package com.sdu.irpc.framework.core.serialization.impl;
+package com.sdu.irpc.framework.core.serializer.impl;
 
 import com.sdu.irpc.framework.common.exception.SerializeException;
-import com.sdu.irpc.framework.core.serialization.Serializer;
+import com.sdu.irpc.framework.core.serializer.Serializer;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;

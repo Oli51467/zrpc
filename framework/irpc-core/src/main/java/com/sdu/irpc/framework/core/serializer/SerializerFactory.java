@@ -1,13 +1,13 @@
-package com.sdu.irpc.framework.core.serialization;
+package com.sdu.irpc.framework.core.serializer;
 
 import com.sdu.irpc.framework.common.entity.ObjectWrapper;
 import lombok.extern.slf4j.Slf4j;
-import com.sdu.irpc.framework.core.serialization.impl.*;
+import com.sdu.irpc.framework.core.serializer.impl.*;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
-public class SerializationFactory {
+public class SerializerFactory {
 
     private final static ConcurrentHashMap<String, ObjectWrapper<Serializer>> SERIALIZER_CACHE = new ConcurrentHashMap<>(8);
     private final static ConcurrentHashMap<Byte, ObjectWrapper<Serializer>> SERIALIZER_CODE_CACHE = new ConcurrentHashMap<>(8);

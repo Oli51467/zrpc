@@ -3,8 +3,8 @@ package com.sdu.irpc.framework.core.config;
 import com.sdu.irpc.framework.common.constant.ZooKeeperConstant;
 import com.sdu.irpc.framework.common.enums.RegistryType;
 import com.sdu.irpc.framework.common.exception.DiscoveryException;
-import com.sdu.irpc.framework.core.registration.Registry;
-import com.sdu.irpc.framework.core.registration.impl.ZooKeeperRegistry;
+import com.sdu.irpc.framework.core.registry.Registry;
+import com.sdu.irpc.framework.core.registry.impl.ZooKeeperRegistry;
 
 public class RegistryConfig {
 

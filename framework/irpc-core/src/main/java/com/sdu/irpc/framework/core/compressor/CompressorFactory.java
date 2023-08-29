@@ -1,7 +1,7 @@
-package com.sdu.irpc.framework.core.compression;
+package com.sdu.irpc.framework.core.compressor;
 
 import com.sdu.irpc.framework.common.entity.ObjectWrapper;
-import com.sdu.irpc.framework.core.compression.impl.GzipCompressor;
+import com.sdu.irpc.framework.core.compressor.impl.GzipCompressor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;

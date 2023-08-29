@@ -3,10 +3,10 @@ package com.sdu.irpc.framework.core.handler.inbound;
 import com.sdu.irpc.framework.common.constant.MessageConstant;
 import com.sdu.irpc.framework.common.enums.RequestType;
 import com.sdu.irpc.framework.common.exception.ProtocolException;
-import com.sdu.irpc.framework.core.compression.Compressor;
-import com.sdu.irpc.framework.core.compression.CompressorFactory;
-import com.sdu.irpc.framework.core.serialization.SerializationFactory;
-import com.sdu.irpc.framework.core.serialization.Serializer;
+import com.sdu.irpc.framework.core.compressor.Compressor;
+import com.sdu.irpc.framework.core.compressor.CompressorFactory;
+import com.sdu.irpc.framework.core.serializer.SerializerFactory;
+import com.sdu.irpc.framework.core.serializer.Serializer;
 import com.sdu.irpc.framework.core.transport.RequestPayload;
 import com.sdu.irpc.framework.core.transport.RpcRequest;
 import io.netty.buffer.ByteBuf;
@@ -96,7 +96,7 @@ public class RequestMessageDecoder extends LengthFieldBasedFrameDecoder implemen
             Compressor compressor = CompressorFactory.getCompressor(compressionType).getImpl();
             payload = compressor.decompress(payload);
             // 反序列化
-            Serializer serializer = SerializationFactory.getSerializer(serializationType).getImpl();
+            Serializer serializer = SerializerFactory.getSerializer(serializationType).getImpl();
             RequestPayload requestPayload = serializer.deserialize(payload, RequestPayload.class);
             request.setRequestPayload(requestPayload);
         }

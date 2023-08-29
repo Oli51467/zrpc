@@ -5,9 +5,9 @@ import com.sdu.irpc.framework.common.exception.DiscoveryException;
 import com.sdu.irpc.framework.common.exception.NetworkException;
 import com.sdu.irpc.framework.core.IRpcBootstrap;
 import com.sdu.irpc.framework.core.NettyBoostrapInitializer;
-import com.sdu.irpc.framework.core.compression.CompressorFactory;
-import com.sdu.irpc.framework.core.registration.Registry;
-import com.sdu.irpc.framework.core.serialization.SerializationFactory;
+import com.sdu.irpc.framework.core.compressor.CompressorFactory;
+import com.sdu.irpc.framework.core.registry.Registry;
+import com.sdu.irpc.framework.core.serializer.SerializerFactory;
 import com.sdu.irpc.framework.core.transport.RequestPayload;
 import com.sdu.irpc.framework.core.transport.RpcRequest;
 import io.netty.channel.Channel;
@@ -51,7 +51,7 @@ public class RpcClientInvocationHandler implements InvocationHandler {
                 .requestId(1L)
                 .compressionType(CompressorFactory.getCompressor(IRpcBootstrap.getInstance().getConfiguration().getCompressionType()).getCode())
                 .requestType(RequestType.REQUEST.getCode())
-                .serializationType(SerializationFactory.getSerializer(IRpcBootstrap.getInstance().getConfiguration().getSerializationType()).getCode())
+                .serializationType(SerializerFactory.getSerializer(IRpcBootstrap.getInstance().getConfiguration().getSerializationType()).getCode())
                 .timeStamp(System.currentTimeMillis())
                 .requestPayload(requestPayload)
                 .build();
