@@ -6,6 +6,8 @@ import com.sdu.irpc.framework.core.config.RegistryConfig;
 import com.sdu.irpc.framework.core.config.ServiceConfig;
 import com.sdu.irpc.framework.core.handler.HttpHeadersHandler;
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
@@ -17,6 +19,7 @@ import io.netty.util.concurrent.Future;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -111,8 +114,8 @@ public class IRpcBootstrap {
      * 启动netty服务
      */
     public void start() {
-        EventLoopGroup masterGroup = new NioEventLoopGroup(1);
-        EventLoopGroup workerGroup = new NioEventLoopGroup(5);
+        EventLoopGroup masterGroup = new NioEventLoopGroup(2);
+        EventLoopGroup workerGroup = new NioEventLoopGroup(10);
         try {
             // 服务器引导程序
             ServerBootstrap serverBootstrap = new ServerBootstrap();
@@ -125,10 +128,19 @@ public class IRpcBootstrap {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel socketChannel) {
-                            socketChannel.pipeline().addLast(new LoggingHandler())
+                            socketChannel.pipeline()
+                                    .addLast(new LoggingHandler())
                                     .addLast(new ChunkedWriteHandler())
                                     .addLast(new HttpObjectAggregator(8192))
                                     .addLast(new HttpHeadersHandler())
+                                    .addLast(new SimpleChannelInboundHandler<>() {
+                                        @Override
+                                        protected void channelRead0(ChannelHandlerContext channelHandlerContext, Object msg) throws Exception {
+                                            ByteBuf byteBuf = (ByteBuf) msg;
+                                            log.info("收到数据: {}", byteBuf.toString(StandardCharsets.UTF_8));
+                                            channelHandlerContext.channel().writeAndFlush(Unpooled.copiedBuffer("back".getBytes()));
+                                        }
+                                    })
                             ;
                         }
                     });
@@ -175,8 +187,6 @@ public class IRpcBootstrap {
     public IRpcBootstrap reference(ReferenceConfig<?> reference) {
         // 将这个代理设置注册中心
         reference.setRegistry(configuration.getRegistryConfig().getRegistry());
-        // 在这个方法里我们是否可以拿到相关的配置项-注册中心
-        // 配置reference，将来调用get方法时，方便生成代理对象
         return this;
 
     }

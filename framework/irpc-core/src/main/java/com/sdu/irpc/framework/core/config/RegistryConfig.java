@@ -8,7 +8,7 @@ import com.sdu.irpc.framework.core.registration.impl.ZooKeeperRegistry;
 
 public class RegistryConfig {
 
-    private String connectionName;
+    private final String connectionName;
 
     public RegistryConfig(String connectionName) {
         this.connectionName = connectionName;

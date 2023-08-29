@@ -29,7 +29,7 @@ public class ZookeeperUtil {
             ZooKeeper zooKeeper = new ZooKeeper(connectionAddr, timeout, event -> {
                 // 只有连接成功才放行
                 if (event.getState() == Watcher.Event.KeeperState.SyncConnected) {
-                    log.info("客户端连接成功");
+                    log.info("ZooKeeper连接成功");
                     countDownLatch.countDown();
                 }
             });

@@ -18,20 +18,18 @@ public class NetUtil {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             while (interfaces.hasMoreElements()) {
                 NetworkInterface networkInterface = interfaces.nextElement();
-                // 过滤非回环接口和虚拟接口
-                if (networkInterface.isLoopback() || networkInterface.isVirtual() || !networkInterface.isUp()) {
-                    continue;
-                }
                 Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
                 while (addresses.hasMoreElements()) {
                     InetAddress addr = addresses.nextElement();
                     // 过滤IPv6地址和回环地址
-                    if (addr instanceof Inet6Address || addr.isLoopbackAddress()) {
-                        continue;
+                    if (!addr.isLoopbackAddress() && addr.getAddress().length == 4) {
+                        String hostAddress = addr.getHostAddress();
+                        // 过滤掉特殊地址
+                        if (!hostAddress.startsWith("0.") && !hostAddress.equals("127.0.0.1")) {
+                            log.info("局域网IP地址：{}", hostAddress);
+                            return hostAddress + ":" + port;
+                        }
                     }
-                    String ipAddress = addr.getHostAddress();
-                    log.info("局域网IP地址：{}", ipAddress);
-                    return ipAddress + ":" + port;
                 }
             }
             throw new NetworkException();

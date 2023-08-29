@@ -2,7 +2,7 @@ package com.sdu.irpc.framework.common.constant;
 
 public interface DefaultBoostrapConfig {
 
-    Integer DEFAULT_PORT = 8090;
+    Integer DEFAULT_PORT = 9934;
 
     String DEFAULT_APPLICATION_NAME = "default";
 
