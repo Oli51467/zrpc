@@ -5,21 +5,22 @@ import com.sdu.irpc.framework.core.config.ReferenceConfig;
 import com.sdu.irpc.framework.core.config.RegistryConfig;
 import com.sdu.irpc.framework.core.config.ServiceConfig;
 import com.sdu.irpc.framework.core.handler.inbound.HttpHeadersHandler;
+import com.sdu.irpc.framework.core.handler.inbound.RequestMessageDecoder;
+import com.sdu.irpc.framework.core.transport.RpcRequest;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.util.concurrent.Future;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -132,15 +133,15 @@ public class IRpcBootstrap {
                         @Override
                         protected void initChannel(SocketChannel socketChannel) {
                             socketChannel.pipeline()
-                                    .addLast(new LoggingHandler())
+                                    .addLast(new LoggingHandler(LogLevel.DEBUG))
                                     .addLast(new ChunkedWriteHandler())
                                     .addLast(new HttpObjectAggregator(8192))
                                     .addLast(new HttpHeadersHandler())
-                                    .addLast(new SimpleChannelInboundHandler<>() {
+                                    .addLast(new RequestMessageDecoder())
+                                    .addLast(new SimpleChannelInboundHandler<RpcRequest>() {
                                         @Override
-                                        protected void channelRead0(ChannelHandlerContext channelHandlerContext, Object msg) throws Exception {
-                                            ByteBuf byteBuf = (ByteBuf) msg;
-                                            log.info("收到数据: {}", byteBuf.toString(StandardCharsets.UTF_8));
+                                        protected void channelRead0(ChannelHandlerContext channelHandlerContext, RpcRequest msg) throws Exception {
+                                            log.info("收到数据: {}", msg.toString());
                                             channelHandlerContext.channel().writeAndFlush(Unpooled.copiedBuffer("back".getBytes()));
                                         }
                                     })
