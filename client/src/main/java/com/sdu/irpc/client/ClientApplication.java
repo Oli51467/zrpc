@@ -17,7 +17,6 @@ public class ClientApplication {
          */
         IRpcBootstrap.getInstance()
                 .application("client")
-                .registry()
                 .reference(reference);
         Greet greet = reference.get();
         greet.greet("Client say hi");
