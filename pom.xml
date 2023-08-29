@@ -30,6 +30,7 @@
         <fastjson.version>2.0.11</fastjson.version>
         <commons.version>3.12.0</commons.version>
         <lombok.version>1.18.24</lombok.version>
+        <hession.version>4.0.66</hession.version>
     </properties>
 
     <dependencyManagement>
@@ -96,6 +97,12 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
                 <version>${commons.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.caucho</groupId>
+                <artifactId>hessian</artifactId>
+                <version>${hession.version}</version>
             </dependency>
 
         </dependencies>

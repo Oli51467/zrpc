@@ -5,7 +5,8 @@ import com.sdu.irpc.framework.common.exception.NetworkException;
 import com.sdu.irpc.framework.core.IRpcBootstrap;
 import com.sdu.irpc.framework.core.NettyBoostrapInitializer;
 import com.sdu.irpc.framework.core.registration.Registry;
-import io.netty.buffer.Unpooled;
+import com.sdu.irpc.framework.core.transport.RequestPayload;
+import com.sdu.irpc.framework.core.transport.RpcRequest;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import lombok.extern.slf4j.Slf4j;
@@ -34,23 +35,34 @@ public class RpcClientInvocationHandler implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         log.info("method -> {}", method.getName());
         log.info("args -> {}", args);
+        // 1.封装报文
+        RequestPayload requestPayload = RequestPayload.builder()
+                .interfaceName(targetInterface.getName())
+                .methodName(method.getName())
+                .parametersType(method.getParameterTypes())
+                .parametersValue(args)
+                .returnType(method.getReturnType())
+                .build();
+        // 2.创建一个请求
+        RpcRequest request = RpcRequest.builder()
+                .requestId(1L)
+                .compressionType((byte) 1)
+                .requestType((byte) 1)
+                .serializationType((byte) 1)
+                .timeStamp(System.currentTimeMillis())
+                .requestPayload(requestPayload)
+                .build();
 
-        // 寻找该服务的可用节点
+        // 3.寻找该服务的可用节点
         List<InetSocketAddress> socketAddress = registry.discover(targetInterface.getName());
         log.info("发现服务【{}】的提供者: {}", targetInterface.getName(), socketAddress.get(0));
         Channel channel = getChannel(socketAddress.get(0));
-        if (null == channel) {
-            log.error("获取或建立与【{}】的通道时发生了异常。", socketAddress.get(0));
-            throw new NetworkException("获取通道时发生了异常。");
-        }
-        // 异步发送报文
+        // 4.异步发送报文 并将该任务挂起
         CompletableFuture<Object> completableFuture = new CompletableFuture<>();
-        // 将该任务挂起
         IRpcBootstrap.PENDING_REQUEST.put(1L, completableFuture);
-        // 写出的报文会执行OutHandler处理
-        channel.writeAndFlush(Unpooled.copiedBuffer("djndjn".getBytes())).addListener((ChannelFutureListener) promise -> {
+        channel.writeAndFlush(request).addListener((ChannelFutureListener) promise -> {
             if (!promise.isSuccess()) {
-                log.error("Error");
+                log.error("远程调用失败");
                 completableFuture.completeExceptionally(promise.cause());
             }
         });
@@ -84,6 +96,10 @@ public class RpcClientInvocationHandler implements InvocationHandler {
                 throw new DiscoveryException(e);
             }
             IRpcBootstrap.CHANNEL_CACHE.put(address, channel);
+        }
+        if (null == channel) {
+            log.error("获取或建立与【{}】的通道时发生了异常。", address);
+            throw new NetworkException("获取通道时发生了异常。");
         }
 
         return channel;

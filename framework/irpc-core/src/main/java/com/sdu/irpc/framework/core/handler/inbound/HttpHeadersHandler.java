@@ -1,4 +1,4 @@
-package com.sdu.irpc.framework.core.handler;
+package com.sdu.irpc.framework.core.handler.inbound;
 
 import com.sdu.irpc.framework.common.entity.RequestInfo;
 import com.sdu.irpc.framework.common.entity.UserContextHolder;
