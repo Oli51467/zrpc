@@ -45,7 +45,7 @@ public class ZooKeeperRegistry extends AbstractRegistry {
             ZooKeeperNode node = new ZooKeeperNode(finalNodePath, null);
             ZookeeperUtil.createNode(zooKeeper, node, null, CreateMode.EPHEMERAL);
         }
-        log.info("服务{}，已经被注册", service.getInterface().getName());
+        log.info("服务{}注册成功", service.getInterface().getName());
     }
 
     /**

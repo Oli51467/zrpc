@@ -4,8 +4,19 @@ import com.sdu.irpc.framework.core.config.Configuration;
 import com.sdu.irpc.framework.core.config.ReferenceConfig;
 import com.sdu.irpc.framework.core.config.RegistryConfig;
 import com.sdu.irpc.framework.core.config.ServiceConfig;
+import com.sdu.irpc.framework.core.handler.HttpHeadersHandler;
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.*;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.stream.ChunkedWriteHandler;
+import io.netty.util.concurrent.Future;
 import lombok.extern.slf4j.Slf4j;
 
+import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,6 +28,8 @@ public class IRpcBootstrap {
 
     // 维护已经发布且暴露的服务列表 (k, v) -> (接口的全限定名, ServiceConfig)
     public static final Map<String, ServiceConfig<?>> SERVICE_MAP = new ConcurrentHashMap<>(8);
+    // 连接的缓存
+    public static final Map<InetSocketAddress, Channel> CHANNEL_CACHE = new ConcurrentHashMap<>(8);
 
     private final Configuration configuration;
 
@@ -97,11 +110,39 @@ public class IRpcBootstrap {
     /**
      * 启动netty服务
      */
-    public void start()  {
+    public void start() {
+        EventLoopGroup masterGroup = new NioEventLoopGroup(1);
+        EventLoopGroup workerGroup = new NioEventLoopGroup(5);
         try {
-            Thread.sleep(1000000);
+            // 服务器引导程序
+            ServerBootstrap serverBootstrap = new ServerBootstrap();
+            // 3、配置服务器
+            serverBootstrap = serverBootstrap.group(masterGroup, workerGroup)
+                    .channel(NioServerSocketChannel.class)
+                    .option(ChannelOption.SO_BACKLOG, 10240) // 服务端可连接队列大小
+                    .option(ChannelOption.SO_REUSEADDR, true) // 参数表示允许重复使用本地地址和端口
+                    .childOption(ChannelOption.SO_KEEPALIVE, true) // 保活开关2h没有数据服务端会发送心跳包
+                    .childHandler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        protected void initChannel(SocketChannel socketChannel) {
+                            socketChannel.pipeline().addLast(new LoggingHandler())
+                                    .addLast(new ChunkedWriteHandler())
+                                    .addLast(new HttpObjectAggregator(8192))
+                                    .addLast(new HttpHeadersHandler())
+                            ;
+                        }
+                    });
+            // 4、绑定端口
+            ChannelFuture channelFuture = serverBootstrap.bind(configuration.getPort()).sync();
+            channelFuture.channel().closeFuture().sync();
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+        } finally {
+            Future<?> future = masterGroup.shutdownGracefully();
+            Future<?> future1 = workerGroup.shutdownGracefully();
+            future.syncUninterruptibly();
+            future1.syncUninterruptibly();
+            log.info("Tcp server shutdown gracefully");
         }
     }
 
