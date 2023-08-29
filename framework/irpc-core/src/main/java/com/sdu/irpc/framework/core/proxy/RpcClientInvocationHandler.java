@@ -45,6 +45,8 @@ public class RpcClientInvocationHandler implements InvocationHandler {
         }
         // 异步发送报文
         CompletableFuture<Object> completableFuture = new CompletableFuture<>();
+        // 将该任务挂起
+        IRpcBootstrap.PENDING_REQUEST.put(1L, completableFuture);
         // 写出的报文会执行OutHandler处理
         channel.writeAndFlush(Unpooled.copiedBuffer("djndjn".getBytes())).addListener((ChannelFutureListener) promise -> {
             if (!promise.isSuccess()) {
@@ -52,8 +54,7 @@ public class RpcClientInvocationHandler implements InvocationHandler {
                 completableFuture.completeExceptionally(promise.cause());
             }
         });
-        //completableFuture.get(10, TimeUnit.SECONDS);
-        return null;
+        return completableFuture.get(3, TimeUnit.SECONDS);
     }
 
     /**

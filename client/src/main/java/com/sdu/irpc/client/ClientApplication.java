@@ -3,7 +3,9 @@ package com.sdu.irpc.client;
 import com.sdu.irpc.api.Greet;
 import com.sdu.irpc.framework.core.IRpcBootstrap;
 import com.sdu.irpc.framework.core.config.ReferenceConfig;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class ClientApplication {
 
     public static void main(String[] args) {
@@ -19,6 +21,6 @@ public class ClientApplication {
                 .application("client")
                 .reference(reference);
         Greet greet = reference.get();
-        greet.greet("Client say hi");
+        log.info("远程调用返回值: {}", greet.greet("Client say hi"));
     }
 }

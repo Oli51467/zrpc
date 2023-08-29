@@ -68,6 +68,16 @@ public class ZookeeperUtil {
         }
     }
 
+    public static void deleteNode(ZooKeeper zooKeeper, String path, Watcher watcher, Integer version) {
+        try {
+            if (zooKeeper.exists(path, watcher) != null) {
+                zooKeeper.delete(path, version);
+            }
+        } catch (InterruptedException | KeeperException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     /**
      * 判断节点是否存在
      *
