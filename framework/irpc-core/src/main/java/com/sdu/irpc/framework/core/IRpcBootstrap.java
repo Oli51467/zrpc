@@ -1,7 +1,6 @@
 package com.sdu.irpc.framework.core;
 
 import com.sdu.irpc.framework.core.config.Configuration;
-import com.sdu.irpc.framework.core.config.ReferenceConfig;
 import com.sdu.irpc.framework.core.config.RegistryConfig;
 import com.sdu.irpc.framework.core.config.ServiceConfig;
 import com.sdu.irpc.framework.core.handler.inbound.HttpHeadersHandler;
@@ -115,6 +114,17 @@ public class IRpcBootstrap {
     }
 
     /**
+     * 配置服务的端口
+     *
+     * @param port 端口
+     * @return this当前实例
+     */
+    public IRpcBootstrap port(int port) {
+        configuration.setPort(port);
+        return this;
+    }
+
+    /**
      * 启动netty服务
      */
     public void start() {
@@ -181,12 +191,5 @@ public class IRpcBootstrap {
             this.publish(service);
         }
         return this;
-    }
-
-    public IRpcBootstrap reference(ReferenceConfig<?> reference) {
-        // 将这个代理设置注册中心
-        reference.setRegistry(configuration.getRegistryConfig().getRegistry());
-        return this;
-
     }
 }

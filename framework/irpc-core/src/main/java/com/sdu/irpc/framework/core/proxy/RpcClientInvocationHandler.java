@@ -17,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -26,18 +25,14 @@ import java.util.concurrent.TimeoutException;
 @Slf4j
 public class RpcClientInvocationHandler implements InvocationHandler {
 
-    private final Registry registry;
     private final Class<?> targetInterface;
 
-    public RpcClientInvocationHandler(Registry registry, Class<?> targetInterface) {
-        this.registry = registry;
+    public RpcClientInvocationHandler(Class<?> targetInterface) {
         this.targetInterface = targetInterface;
     }
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        log.info("method -> {}", method.getName());
-        log.info("args -> {}", args);
         // 1.封装报文
         RequestPayload requestPayload = RequestPayload.builder()
                 .interfaceName(targetInterface.getName())
@@ -56,10 +51,10 @@ public class RpcClientInvocationHandler implements InvocationHandler {
                 .requestPayload(requestPayload)
                 .build();
 
-        // 3.寻找该服务的可用节点
-        List<InetSocketAddress> socketAddress = registry.discover(targetInterface.getName());
-        log.info("发现服务【{}】的提供者: {}", targetInterface.getName(), socketAddress.get(0));
-        Channel channel = getChannel(socketAddress.get(0));
+        // 3.寻找该服务的可用节点，通过客户端负载均衡寻找一个可用的服务
+        InetSocketAddress address = IRpcBootstrap.getInstance().getConfiguration().getLoadBalancer().selectService(targetInterface.getName());
+        log.info("发现服务【{}】的提供者: {}", targetInterface.getName(), address);
+        Channel channel = getChannel(address);
         // 4.异步发送报文 并将该任务挂起
         CompletableFuture<Object> completableFuture = new CompletableFuture<>();
         IRpcBootstrap.PENDING_REQUEST.put(1L, completableFuture);

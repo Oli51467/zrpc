@@ -17,9 +17,9 @@ public class ClientApplication {
          * 3. 选择一个服务并建立连接
          * 4. 发送请求，获得结果
          */
-        IRpcBootstrap.getInstance()
-                .application("client")
-                .reference(reference);
-        log.info("远程调用返回值: {}", reference.get().greet("Client say hi"));
+        IRpcBootstrap.getInstance().application("client");
+        for (int i = 0; i < 10; i++) {
+            log.info("远程调用返回值: {}", reference.get().greet("Client say hi"));
+        }
     }
 }
