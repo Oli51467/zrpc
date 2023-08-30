@@ -9,7 +9,6 @@
     <version>1.0.0</version>
     <packaging>pom</packaging>
     <modules>
-        <module>test</module>
         <module>framework</module>
         <module>framework/irpc-common</module>
         <module>framework/irpc-core</module>

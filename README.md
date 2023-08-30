@@ -102,3 +102,5 @@ Payload的结构取决于具体的请求或响应的数据
 [如何抽象序列化和压缩工厂](./docs/ser_com.md)
 
 [服务提供方如何通过反射调用具体实现的方法](./docs/reflect.md)
+
+[分布式全局唯一ID解决方案](./docs/snowflake.md)

@@ -22,6 +22,8 @@ public interface Compressor {
 ```
 
 实现最基本的jdk序列化方式 JdkSerializer
+
+jdk的序列化方式就是使用IO进行序列化，他只支持不同的jvm之间的传输，并不能跨语言。
 ```java
 @Slf4j
 public class JdkSerializer implements Serializer {
@@ -67,38 +69,13 @@ public class JdkSerializer implements Serializer {
 }
 ```
 
-额外实现JsonSerializer和HessianSerializer
-```java
-@Slf4j
-public class JsonSerializer implements Serializer {
-    @Override
-    public byte[] serialize(Object object) {
-        if (object == null) {
-            return null;
-        }
+HessianSerializer
 
-        byte[] result = JSON.toJSONBytes(object);
-        if (log.isDebugEnabled()) {
-            log.debug("对象【{}】已经完成了序列化操作，序列化后的字节数为【{}】", object, result.length);
-        }
-        return result;
+Hessian序列化是一种支持动态类型、跨语言、基于对象传输的网络协议，Java对象序列化的二进制流可以被其他语言（如，c++，python）。特性如下：
 
-    }
-
-    @Override
-    public <T> T deserialize(byte[] bytes, Class<T> clazz) {
-        if (bytes == null || clazz == null) {
-            return null;
-        }
-        T t = JSON.parseObject(bytes, clazz);
-        if (log.isDebugEnabled()) {
-            log.debug("类【{}】已经完成了反序列化操作.", clazz);
-        }
-        return t;
-    }
-}
-```
-
+- **自描述序列化类型**。不依赖外部描述文件或者接口定义，用一个字节表示常用的基础类型，极大缩短二进制流。
+语言无关，支持脚本语言。
+- 协议简单，比Java原生序列化高效 相比hessian1，hessian2中增加了压缩编码，其序列化二进制流大小是Java序列化的**50%**，序列化耗时是Java序列化的**30%**，反序列化耗时是Java序列化的**20%**。
 ```java
 @Slf4j
 public class HessianSerializer implements Serializer {
@@ -139,6 +116,38 @@ public class HessianSerializer implements Serializer {
             log.error("使用hessian进行反序列化对象【{}】时发生异常.", clazz);
             throw new SerializeException(e);
         }
+    }
+}
+```
+
+基于AlibabaFastJSON的JsonSerializer
+```java
+@Slf4j
+public class JsonSerializer implements Serializer {
+    @Override
+    public byte[] serialize(Object object) {
+        if (object == null) {
+            return null;
+        }
+
+        byte[] result = JSON.toJSONBytes(object);
+        if (log.isDebugEnabled()) {
+            log.debug("对象【{}】已经完成了序列化操作，序列化后的字节数为【{}】", object, result.length);
+        }
+        return result;
+
+    }
+
+    @Override
+    public <T> T deserialize(byte[] bytes, Class<T> clazz) {
+        if (bytes == null || clazz == null) {
+            return null;
+        }
+        T t = JSON.parseObject(bytes, clazz);
+        if (log.isDebugEnabled()) {
+            log.debug("类【{}】已经完成了反序列化操作.", clazz);
+        }
+        return t;
     }
 }
 ```

@@ -7,6 +7,7 @@ import com.sdu.irpc.framework.core.config.ServiceConfig;
 import com.sdu.irpc.framework.core.handler.inbound.HttpHeadersHandler;
 import com.sdu.irpc.framework.core.handler.inbound.MethodInvokeHandler;
 import com.sdu.irpc.framework.core.handler.inbound.RequestMessageDecoder;
+import com.sdu.irpc.framework.core.handler.outbound.ResponseMessageEncoder;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -138,6 +139,7 @@ public class IRpcBootstrap {
                                     .addLast(new HttpHeadersHandler())      // 解析http头部
                                     .addLast(new RequestMessageDecoder())   // 消息解码
                                     .addLast(new MethodInvokeHandler())     // 反射调用方法
+                                    .addLast(new ResponseMessageEncoder())  // 处理响应编码
                             ;
                         }
                     });

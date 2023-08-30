@@ -3,19 +3,20 @@ package com.sdu.irpc.framework.core.handler.outbound;
 import com.sdu.irpc.framework.common.constant.RpcMessageConstant;
 import com.sdu.irpc.framework.core.compressor.Compressor;
 import com.sdu.irpc.framework.core.compressor.CompressorFactory;
-import com.sdu.irpc.framework.core.serializer.SerializerFactory;
 import com.sdu.irpc.framework.core.serializer.Serializer;
-import com.sdu.irpc.framework.core.transport.RpcRequest;
+import com.sdu.irpc.framework.core.serializer.SerializerFactory;
+import com.sdu.irpc.framework.core.transport.RpcResponse;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 请求的协议编码处理器
+ * 响应的协议编码处理器
+ * 协议编码器
  * 0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16   17   18   19   20   21   22   23  24   25   26   27   28   29   30
  * +----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----
- * |    magic          |ver |head  len|    full length    | qt | se |comp|              RequestId                |             Timestamp
+ * |    magic          |ver |head  len|    full length    | cd | se |comp|              RequestId                |             Timestamp
  * +-----+-----+-------+----+----+----+----+-----------+--+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----
  * |
  * |                                                   body
@@ -27,15 +28,15 @@ import lombok.extern.slf4j.Slf4j;
  * 4B total  length 报文总长度
  * 1B serialize 序列化方式
  * 1B compression 压缩方式
- * 1B requestType 请求类型
+ * 1B code 响应状态码
  * 8B requestId 请求Id
  * 8B timeStamp 时间戳
  */
 @Slf4j
-public class RequestMessageEncoder extends MessageToByteEncoder<RpcRequest> implements RpcMessageConstant {
+public class ResponseMessageEncoder extends MessageToByteEncoder<RpcResponse> implements RpcMessageConstant {
 
     @Override
-    protected void encode(ChannelHandlerContext channelHandlerContext, RpcRequest rpcRequest, ByteBuf byteBuf) {
+    protected void encode(ChannelHandlerContext channelHandlerContext, RpcResponse rpcResponse, ByteBuf byteBuf) {
         // 4个字节的魔数值
         byteBuf.writeBytes(MAGIC);
         // 1个字节的版本号
@@ -45,19 +46,19 @@ public class RequestMessageEncoder extends MessageToByteEncoder<RpcRequest> impl
         // 先把总长度的4字节空出来 先写后面的
         byteBuf.writerIndex(byteBuf.writerIndex() + FULL_FIELD_LENGTH);
         // 请求类型、序列化、压缩类型
-        byteBuf.writeByte(rpcRequest.getRequestType());
-        byteBuf.writeByte(rpcRequest.getSerializationType());
-        byteBuf.writeByte(rpcRequest.getCompressionType());
-        byteBuf.writeLong(rpcRequest.getRequestId());
-        byteBuf.writeLong(rpcRequest.getTimeStamp());
+        byteBuf.writeByte(rpcResponse.getCode());
+        byteBuf.writeByte(rpcResponse.getSerializationType());
+        byteBuf.writeByte(rpcResponse.getCompressionType());
+        byteBuf.writeLong(rpcResponse.getRequestId());
+        byteBuf.writeLong(System.currentTimeMillis());
 
         // body
         byte[] body = null;
         int bodyLength = 0;
-        if (null != rpcRequest.getRequestPayload()) {
-            Serializer serializer = SerializerFactory.getSerializer(rpcRequest.getSerializationType()).getImpl();
-            body = serializer.serialize(rpcRequest.getRequestPayload());
-            Compressor compressor = CompressorFactory.getCompressor(rpcRequest.getCompressionType()).getImpl();
+        if (null != rpcResponse.getBody()) {
+            Serializer serializer = SerializerFactory.getSerializer(rpcResponse.getSerializationType()).getImpl();
+            body = serializer.serialize(rpcResponse.getBody());
+            Compressor compressor = CompressorFactory.getCompressor(rpcResponse.getCompressionType()).getImpl();
             body = compressor.compress(body);
         }
         if (null != body) {
@@ -70,6 +71,6 @@ public class RequestMessageEncoder extends MessageToByteEncoder<RpcRequest> impl
         // 总长度=(header长度+body长度)
         byteBuf.writeInt(HEADER_LENGTH + bodyLength);
         byteBuf.writerIndex(writerIndex);
-        log.debug("请求【{}】已经完成报文的编码。", rpcRequest.getRequestId());
+        log.debug("请求【{}】已经完成报文的编码。", rpcResponse.getRequestId());
     }
 }

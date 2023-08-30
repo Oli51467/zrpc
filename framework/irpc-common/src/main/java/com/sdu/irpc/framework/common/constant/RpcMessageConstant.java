@@ -1,6 +1,6 @@
 package com.sdu.irpc.framework.common.constant;
 
-public interface MessageConstant {
+public interface RpcMessageConstant {
 
     byte[] MAGIC = "irpc".getBytes();
 

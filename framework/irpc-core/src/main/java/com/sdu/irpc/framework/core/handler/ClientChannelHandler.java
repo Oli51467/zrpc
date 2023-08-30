@@ -1,5 +1,6 @@
 package com.sdu.irpc.framework.core.handler;
 
+import com.sdu.irpc.framework.core.handler.inbound.ResponseMessageDecoder;
 import com.sdu.irpc.framework.core.handler.inbound.SimpleChannelHandler;
 import com.sdu.irpc.framework.core.handler.outbound.RequestMessageEncoder;
 import io.netty.channel.ChannelInitializer;
@@ -14,6 +15,7 @@ public class ClientChannelHandler extends ChannelInitializer<SocketChannel> {
         socketChannel.pipeline()
                 .addLast(new LoggingHandler(LogLevel.DEBUG))
                 .addLast(new RequestMessageEncoder())
+                .addLast(new ResponseMessageDecoder())
                 .addLast(new SimpleChannelHandler());
     }
 }

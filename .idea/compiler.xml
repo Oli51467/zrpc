@@ -10,12 +10,14 @@
         <module name="irpc-common" />
         <module name="framework" />
         <module name="manager" />
-        <module name="test" />
         <module name="provider" />
         <module name="client" />
         <module name="irpc-core" />
         <module name="api" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="test" target="11" />
+    </bytecodeTargetLevel>
   </component>
 </project>

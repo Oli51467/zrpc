@@ -1,22 +1,19 @@
 package com.sdu.irpc.framework.core.handler.inbound;
 
 import com.sdu.irpc.framework.common.constant.RpcMessageConstant;
-import com.sdu.irpc.framework.common.enums.RequestType;
 import com.sdu.irpc.framework.common.exception.ProtocolException;
 import com.sdu.irpc.framework.core.compressor.Compressor;
 import com.sdu.irpc.framework.core.compressor.CompressorFactory;
-import com.sdu.irpc.framework.core.serializer.SerializerFactory;
 import com.sdu.irpc.framework.core.serializer.Serializer;
-import com.sdu.irpc.framework.core.transport.RequestPayload;
-import com.sdu.irpc.framework.core.transport.RpcRequest;
+import com.sdu.irpc.framework.core.serializer.SerializerFactory;
+import com.sdu.irpc.framework.core.transport.RpcResponse;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class RequestMessageDecoder extends LengthFieldBasedFrameDecoder implements RpcMessageConstant {
-
+public class ResponseMessageDecoder extends LengthFieldBasedFrameDecoder implements RpcMessageConstant {
     /**
      * maxFrameLength：本次能接收的最大的数据长度
      * lengthFieldOffset：设置的长度域的偏移量，长度域在数据包的起始位置
@@ -24,7 +21,7 @@ public class RequestMessageDecoder extends LengthFieldBasedFrameDecoder implemen
      * lengthAdjustment：数据包的偏移量，计算方式 = 数据长度 + lengthAdjustment = 数据总长度
      * initialBytesToStrip：需要跳过的字节数
      */
-    public RequestMessageDecoder() {
+    public ResponseMessageDecoder() {
         super(MAX_FRAME_LENGTH,
                 MAGIC.length + VERSION_LENGTH + HEADER_FIELD_LENGTH,
                 FULL_FIELD_LENGTH,
@@ -34,16 +31,8 @@ public class RequestMessageDecoder extends LengthFieldBasedFrameDecoder implemen
 
     @Override
     protected Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
-        /*
-         * super方法已经将二进制流读成ByteBuf
-         * 先根据提供的长度偏移和长度域长度读取数据包的长度
-         * 根据数据包的长度+偏移量长度计算出本次需要读取的总数据包的长度
-         * 根据设置的跳过数据的长度计算有效的护数据长度
-         * 将有效的数据长度读取出来，然后改变读指针的位置到数据包的末尾
-         * 将解码出来的数据交给ByteToMessageDecoder进行后续操作
-         */
-        Object decodeResult = super.decode(ctx, in);
-        if (decodeResult instanceof ByteBuf byteBuf) {
+        Object decode = super.decode(ctx, in);
+        if (decode instanceof  ByteBuf byteBuf) {
             return decodeFrame(byteBuf);
         }
         return null;
@@ -68,7 +57,7 @@ public class RequestMessageDecoder extends LengthFieldBasedFrameDecoder implemen
         // 解析总长度
         int fullLength = byteBuf.readInt();
         // 请求类型
-        byte requestType = byteBuf.readByte();
+        byte responseCode = byteBuf.readByte();
         // 序列化类型
         byte serializationType = byteBuf.readByte();
         // 压缩类型
@@ -77,31 +66,27 @@ public class RequestMessageDecoder extends LengthFieldBasedFrameDecoder implemen
         long requestId = byteBuf.readLong();
         // 时间戳
         long timeStamp = byteBuf.readLong();
-        RpcRequest request = new RpcRequest();
-        request.setRequestId(requestId);
-        request.setRequestType(requestType);
-        request.setCompressionType(compressionType);
-        request.setSerializationType(serializationType);
-        request.setTimeStamp(timeStamp);
-        // 心跳请求不处理
-        if (requestType == RequestType.HEART_BEAT.getCode()) {
-            return request;
-        }
-        int payloadLength = fullLength - headerLength;
-        byte[] payload = new byte[payloadLength];
-        byteBuf.readBytes(payload);
+        RpcResponse response = new RpcResponse();
+        response.setRequestId(requestId);
+        response.setCode(responseCode);
+        response.setSerializationType(serializationType);
+        response.setTimeStamp(timeStamp);
+        response.setCompressionType(compressionType);
 
-        if (payload.length != 0) {
+        int responseObjectLength = fullLength - headerLength;
+        byte[] responseObject = new byte[responseObjectLength];
+        byteBuf.readBytes(responseObject);
+
+        if (responseObject.length > 0) {
             // 解压缩payload
             Compressor compressor = CompressorFactory.getCompressor(compressionType).getImpl();
-            payload = compressor.decompress(payload);
+            responseObject = compressor.decompress(responseObject);
             // 反序列化
             Serializer serializer = SerializerFactory.getSerializer(serializationType).getImpl();
-            RequestPayload requestPayload = serializer.deserialize(payload, RequestPayload.class);
-            request.setRequestPayload(requestPayload);
+            Object responseBody = serializer.deserialize(responseObject, Object.class);
+            response.setBody(responseBody);
         }
-        log.debug("请求【{}】已经在服务端完成解码工作。", request.getRequestId());
-        return request;
+        log.debug("请求【{}】已经在客户端端完成解码工作。", response.getRequestId());
+        return response;
     }
-
 }

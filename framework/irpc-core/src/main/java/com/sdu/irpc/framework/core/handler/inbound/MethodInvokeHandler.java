@@ -24,8 +24,8 @@ public class MethodInvokeHandler extends SimpleChannelInboundHandler<RpcRequest>
         // 封装响应体
         RpcResponse response = new RpcResponse();
         response.setRequestId(request.getRequestId());
-        response.setCompressionType(response.getCompressionType());
-        response.setSerializationType(response.getSerializationType());
+        response.setCompressionType(request.getCompressionType());
+        response.setSerializationType(request.getSerializationType());
         // 获得通道
         Channel channel = channelHandlerContext.channel();
         // 拿到真正的payload
