@@ -1,15 +1,18 @@
-package com.sdu.irpc.framework.core.transport;
+package com.sdu.irpc.framework.common.entity.rpc;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * 服务提供方回复的响应
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RpcRequest {
+public class RpcResponse {
 
     /**
      * 请求的id
@@ -17,12 +20,7 @@ public class RpcRequest {
     private Long requestId;
 
     /**
-     * 请求类型
-     */
-    private Byte requestType;
-
-    /**
-     * 压缩类型
+     * 压缩方式
      */
     private Byte compressionType;
 
@@ -37,7 +35,14 @@ public class RpcRequest {
     private Long timeStamp;
 
     /**
+     * 响应码
+     * 1 成功
+     * 2 异常
+     */
+    private Byte code;
+
+    /**
      * 具体的消息体
      */
-    private RequestPayload requestPayload;
+    private Object body;
 }

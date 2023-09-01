@@ -2,7 +2,7 @@ package com.sdu.irpc.framework.core.serializer.impl;
 
 import com.alibaba.fastjson2.JSON;
 import com.sdu.irpc.framework.core.serializer.Serializer;
-import com.sdu.irpc.framework.core.transport.RequestPayload;
+import com.sdu.irpc.framework.common.entity.rpc.RequestPayload;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;

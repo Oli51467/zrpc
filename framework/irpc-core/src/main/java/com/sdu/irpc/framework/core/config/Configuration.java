@@ -3,6 +3,7 @@ package com.sdu.irpc.framework.core.config;
 import com.sdu.irpc.framework.common.constant.DefaultBoostrapConfig;
 import com.sdu.irpc.framework.common.util.IdGenerator;
 import com.sdu.irpc.framework.core.loadbalancer.LoadBalancer;
+import com.sdu.irpc.framework.core.loadbalancer.impl.ConsistentHashLoadBalancer;
 import com.sdu.irpc.framework.core.loadbalancer.impl.RoundRobinLoadBalancer;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -25,5 +26,5 @@ public class Configuration implements DefaultBoostrapConfig {
 
     private IdGenerator idGenerator = new IdGenerator();
 
-    private LoadBalancer loadBalancer = new RoundRobinLoadBalancer();
+    private LoadBalancer loadBalancer = new ConsistentHashLoadBalancer();
 }

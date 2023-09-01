@@ -1,4 +1,4 @@
-package com.sdu.irpc.framework.core.transport;
+package com.sdu.irpc.framework.common.entity.rpc;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,11 +1,12 @@
 package com.sdu.irpc.framework.core.handler.inbound;
 
+import com.sdu.irpc.framework.common.enums.RequestType;
 import com.sdu.irpc.framework.common.enums.RespCode;
 import com.sdu.irpc.framework.core.IRpcBootstrap;
 import com.sdu.irpc.framework.core.config.ServiceConfig;
-import com.sdu.irpc.framework.core.transport.RequestPayload;
-import com.sdu.irpc.framework.core.transport.RpcRequest;
-import com.sdu.irpc.framework.core.transport.RpcResponse;
+import com.sdu.irpc.framework.common.entity.rpc.RequestPayload;
+import com.sdu.irpc.framework.common.entity.rpc.RpcRequest;
+import com.sdu.irpc.framework.common.entity.rpc.RpcResponse;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -29,18 +30,23 @@ public class MethodInvokeHandler extends SimpleChannelInboundHandler<RpcRequest>
         // 获得通道
         Channel channel = channelHandlerContext.channel();
         // 拿到真正的payload
-        RequestPayload requestPayload = request.getRequestPayload();
-        try {
-            Object result = doInvoke(requestPayload);
-            log.info("请求【{}】已经在服务端完成方法调用。", request.getRequestId());
-            response.setCode(RespCode.SUCCESS.getCode());
-            response.setBody(result);
-        } catch (Exception e) {
-            log.error("Id为【{}】的请求在调用过程中发生异常。", response.getRequestId(), e);
-            response.setCode(RespCode.FAIL.getCode());
+        if (request.getRequestType() == RequestType.HEART_BEAT.getCode()) {
+            response.setCode(RespCode.SUCCESS_HEART_BEAT.getCode());
+        } else {
+            RequestPayload requestPayload = request.getRequestPayload();
+            try {
+                Object result = doInvoke(requestPayload);
+                log.info("请求【{}】已经在服务端完成方法调用。", request.getRequestId());
+                response.setCode(RespCode.SUCCESS.getCode());
+                response.setBody(result);
+                log.info("服务提供方响应体: {}", response);
+            } catch (Exception e) {
+                log.error("Id为【{}】的请求在调用过程中发生异常。", response.getRequestId(), e);
+                response.setCode(RespCode.FAIL.getCode());
+            }
         }
-        log.info("服务提供方响应体: {}", response);
-        // 写回响应
+        // 设置响应时间戳 写回响应
+        response.setTimeStamp(System.currentTimeMillis());
         channel.writeAndFlush(response);
     }
 

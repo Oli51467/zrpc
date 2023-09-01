@@ -33,6 +33,7 @@ public class ZooKeeperRegistry extends AbstractRegistry {
     @Override
     public void register(ServiceConfig<?> service) {
         // 服务名称的节点 最后一层是方法的全类名
+        // TODO: 正确的路径应该是 /providers/appName/ip1, ip2,.../methodName
         String parentNode = getProviderNodePath(service.getInterface().getName());
         // 创建父节点
         if (!ZookeeperUtil.exists(zooKeeper, parentNode, null)) {

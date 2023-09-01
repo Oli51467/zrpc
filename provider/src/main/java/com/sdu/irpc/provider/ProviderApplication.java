@@ -15,10 +15,11 @@ public class ProviderApplication {
         ServiceConfig<Greet> service = new ServiceConfig<>();
         service.setInterface(Greet.class);
         service.setReference(new GreetImpl());
+        service.setApplicationName("p1");
         // 配置应用名、序列化协议、压缩方式并发布服务
         IRpcBootstrap.getInstance()
-                .application("provider")
-                .port(8093)
+                .application("p1")
+                .port(8091)
                 .publish(service)
                 .start();
     }

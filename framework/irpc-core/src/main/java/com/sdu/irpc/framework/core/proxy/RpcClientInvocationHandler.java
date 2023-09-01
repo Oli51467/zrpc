@@ -1,15 +1,15 @@
 package com.sdu.irpc.framework.core.proxy;
 
+import com.sdu.irpc.framework.common.entity.rpc.RpcRequestHolder;
 import com.sdu.irpc.framework.common.enums.RequestType;
 import com.sdu.irpc.framework.common.exception.DiscoveryException;
 import com.sdu.irpc.framework.common.exception.NetworkException;
 import com.sdu.irpc.framework.core.IRpcBootstrap;
 import com.sdu.irpc.framework.core.NettyBoostrapInitializer;
 import com.sdu.irpc.framework.core.compressor.CompressorFactory;
-import com.sdu.irpc.framework.core.registry.Registry;
 import com.sdu.irpc.framework.core.serializer.SerializerFactory;
-import com.sdu.irpc.framework.core.transport.RequestPayload;
-import com.sdu.irpc.framework.core.transport.RpcRequest;
+import com.sdu.irpc.framework.common.entity.rpc.RequestPayload;
+import com.sdu.irpc.framework.common.entity.rpc.RpcRequest;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import lombok.extern.slf4j.Slf4j;
@@ -43,13 +43,14 @@ public class RpcClientInvocationHandler implements InvocationHandler {
                 .build();
         // 2.创建一个请求
         RpcRequest request = RpcRequest.builder()
-                .requestId(1L)
+                .requestId(IRpcBootstrap.getInstance().getConfiguration().getIdGenerator().getId())
                 .compressionType(CompressorFactory.getCompressor(IRpcBootstrap.getInstance().getConfiguration().getCompressionType()).getCode())
                 .requestType(RequestType.REQUEST.getCode())
                 .serializationType(SerializerFactory.getSerializer(IRpcBootstrap.getInstance().getConfiguration().getSerializationType()).getCode())
                 .timeStamp(System.currentTimeMillis())
                 .requestPayload(requestPayload)
                 .build();
+        RpcRequestHolder.set(request);
 
         // 3.寻找该服务的可用节点，通过客户端负载均衡寻找一个可用的服务
         InetSocketAddress address = IRpcBootstrap.getInstance().getConfiguration().getLoadBalancer().selectService(targetInterface.getName());
@@ -57,13 +58,14 @@ public class RpcClientInvocationHandler implements InvocationHandler {
         Channel channel = getChannel(address);
         // 4.异步发送报文 并将该任务挂起
         CompletableFuture<Object> completableFuture = new CompletableFuture<>();
-        IRpcBootstrap.PENDING_REQUEST.put(1L, completableFuture);
+        IRpcBootstrap.PENDING_REQUEST.put(request.getRequestId(), completableFuture);
         channel.writeAndFlush(request).addListener((ChannelFutureListener) promise -> {
             if (!promise.isSuccess()) {
                 log.error("远程调用失败");
                 completableFuture.completeExceptionally(promise.cause());
             }
         });
+        RpcRequestHolder.remove();
         return completableFuture.get(3, TimeUnit.SECONDS);
     }
 

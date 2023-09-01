@@ -5,7 +5,7 @@ import com.sdu.irpc.framework.core.compressor.Compressor;
 import com.sdu.irpc.framework.core.compressor.CompressorFactory;
 import com.sdu.irpc.framework.core.serializer.Serializer;
 import com.sdu.irpc.framework.core.serializer.SerializerFactory;
-import com.sdu.irpc.framework.core.transport.RpcResponse;
+import com.sdu.irpc.framework.common.entity.rpc.RpcResponse;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
@@ -50,7 +50,7 @@ public class ResponseMessageEncoder extends MessageToByteEncoder<RpcResponse> im
         byteBuf.writeByte(rpcResponse.getSerializationType());
         byteBuf.writeByte(rpcResponse.getCompressionType());
         byteBuf.writeLong(rpcResponse.getRequestId());
-        byteBuf.writeLong(System.currentTimeMillis());
+        byteBuf.writeLong(rpcResponse.getTimeStamp());
 
         // body
         byte[] body = null;

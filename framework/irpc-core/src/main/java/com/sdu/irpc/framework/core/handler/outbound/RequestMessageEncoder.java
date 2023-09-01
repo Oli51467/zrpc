@@ -5,7 +5,7 @@ import com.sdu.irpc.framework.core.compressor.Compressor;
 import com.sdu.irpc.framework.core.compressor.CompressorFactory;
 import com.sdu.irpc.framework.core.serializer.SerializerFactory;
 import com.sdu.irpc.framework.core.serializer.Serializer;
-import com.sdu.irpc.framework.core.transport.RpcRequest;
+import com.sdu.irpc.framework.common.entity.rpc.RpcRequest;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
