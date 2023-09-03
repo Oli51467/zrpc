@@ -7,6 +7,7 @@ import com.sdu.irpc.framework.common.exception.NetworkException;
 import com.sdu.irpc.framework.core.IRpcBootstrap;
 import com.sdu.irpc.framework.core.NettyBoostrapInitializer;
 import com.sdu.irpc.framework.core.compressor.CompressorFactory;
+import com.sdu.irpc.framework.core.loadbalancer.LoadBalancerFactory;
 import com.sdu.irpc.framework.core.serializer.SerializerFactory;
 import com.sdu.irpc.framework.common.entity.rpc.RequestPayload;
 import com.sdu.irpc.framework.common.entity.rpc.RpcRequest;
@@ -25,9 +26,11 @@ import java.util.concurrent.TimeoutException;
 @Slf4j
 public class RpcClientInvocationHandler implements InvocationHandler {
 
+    private final String appName;
     private final Class<?> targetInterface;
 
-    public RpcClientInvocationHandler(Class<?> targetInterface) {
+    public RpcClientInvocationHandler(String appName, Class<?> targetInterface) {
+        this.appName = appName;
         this.targetInterface = targetInterface;
     }
 
@@ -53,7 +56,7 @@ public class RpcClientInvocationHandler implements InvocationHandler {
         RpcRequestHolder.set(request);
 
         // 3.寻找该服务的可用节点，通过客户端负载均衡寻找一个可用的服务
-        InetSocketAddress address = IRpcBootstrap.getInstance().getConfiguration().getLoadBalancer().selectService(targetInterface.getName());
+        InetSocketAddress address = LoadBalancerFactory.getLoadbalancer(IRpcBootstrap.getInstance().getConfiguration().getLoadBalancer()).getImpl().selectService(appName, targetInterface.getName());
         log.info("发现服务【{}】的提供者: {}", targetInterface.getName(), address);
         Channel channel = getChannel(address);
         // 4.异步发送报文 并将该任务挂起

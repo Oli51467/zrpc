@@ -8,9 +8,5 @@ public interface DefaultBoostrapConfig {
 
     String DEFAULT_GROUP_NAME = "default";
 
-    String DEFAULT_SERIALIZATION = "jdk";
-
-    String DEFAULT_COMPRESSION = "gzip";
-
     String DEFAULT_REGISTRY_CONFIG = "zookeeper://127.0.0.1:2181";
 }

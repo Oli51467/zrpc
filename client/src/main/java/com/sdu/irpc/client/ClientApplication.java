@@ -11,6 +11,7 @@ public class ClientApplication {
     public static void main(String[] args) {
         ReferenceConfig<Greet> reference = new ReferenceConfig<>();
         reference.setTargetInterface(Greet.class);
+        reference.setAppName("p1");
         /* 获取代理对象，使用ReferenceConfig进行封装，代理：
          * 1. 连接注册中心
          * 2. 拉取服务列表

@@ -14,8 +14,7 @@ import org.apache.zookeeper.ZooKeeper;
 import java.net.InetSocketAddress;
 import java.util.List;
 
-import static com.sdu.irpc.framework.common.constant.ZooKeeperConstant.getPath;
-import static com.sdu.irpc.framework.common.constant.ZooKeeperConstant.getProviderNodePath;
+import static com.sdu.irpc.framework.common.constant.ZooKeeperConstant.*;
 
 @Slf4j
 public class ZooKeeperRegistry extends AbstractRegistry {
@@ -33,15 +32,21 @@ public class ZooKeeperRegistry extends AbstractRegistry {
     @Override
     public void register(ServiceConfig<?> service) {
         // 服务名称的节点 最后一层是方法的全类名
-        // TODO: 正确的路径应该是 /providers/appName/ip1, ip2,.../methodName
-        String parentNode = getProviderNodePath(service.getInterface().getName());
-        // 创建父节点
-        if (!ZookeeperUtil.exists(zooKeeper, parentNode, null)) {
-            ZooKeeperNode node = new ZooKeeperNode(parentNode, null);
+        // 路径是 /providers/appName/methodName/ip1, ip2,...
+        String applicationNode = getProviderNodePath(service.getApplicationName());
+        // 创建父节点(应用节点)
+        if (!ZookeeperUtil.exists(zooKeeper, applicationNode, null)) {
+            ZooKeeperNode node = new ZooKeeperNode(applicationNode, null);
             ZookeeperUtil.createNode(zooKeeper, node, null, CreateMode.PERSISTENT);
         }
-        // 创建临时本机节点
-        String finalNodePath = getPath(parentNode, NetUtil.getIp(IRpcBootstrap.getInstance().getConfiguration().getPort()));
+        String methodNode = getPath(applicationNode, service.getInterface().getName());
+        // 创建父节点(方法节点)
+        if (!ZookeeperUtil.exists(zooKeeper, methodNode, null)) {
+            ZooKeeperNode node = new ZooKeeperNode(methodNode, null);
+            ZookeeperUtil.createNode(zooKeeper, node, null, CreateMode.PERSISTENT);
+        }
+        // 创建临时本机节点(ip节点)
+        String finalNodePath = getPath(methodNode, NetUtil.getIp(IRpcBootstrap.getInstance().getConfiguration().getPort()));
         if (!ZookeeperUtil.exists(zooKeeper, finalNodePath, null)) {
             ZooKeeperNode node = new ZooKeeperNode(finalNodePath, null);
             ZookeeperUtil.createNode(zooKeeper, node, null, CreateMode.EPHEMERAL);
@@ -55,9 +60,9 @@ public class ZooKeeperRegistry extends AbstractRegistry {
      * @return 服务列表
      */
     @Override
-    public List<InetSocketAddress> discover(String serviceName) {
+    public List<InetSocketAddress> discover(String appName, String serviceName) {
         // 找到服务对应的节点
-        String serviceNode = getProviderNodePath(serviceName);
+        String serviceNode = getProviderNodePath(appName, serviceName);
         // 从zk中获取他的子节点
         List<String> children = ZookeeperUtil.getChildren(zooKeeper, serviceNode, null);
         // 获取了所有的可用的服务列表

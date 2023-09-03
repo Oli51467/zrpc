@@ -22,6 +22,14 @@ public class ZooKeeperConstant {
         return BASE_PATH + BASE_CLIENTS_PATH;
     }
 
+    public static String getProviderNodePath(String ...args) {
+        StringBuilder path = new StringBuilder(getBaseProvidersPath());
+        for (String arg : args) {
+            path.append(SPLIT).append(arg);
+        }
+        return path.toString();
+    }
+
     public static String getProviderNodePath(String serviceName) {
         return getBaseProvidersPath() + SPLIT + serviceName;
     }

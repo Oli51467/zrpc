@@ -1,5 +1,8 @@
 package com.sdu.irpc.framework.core;
 
+import com.sdu.irpc.framework.common.enums.CompressionType;
+import com.sdu.irpc.framework.common.enums.LoadBalancerType;
+import com.sdu.irpc.framework.common.enums.SerializationType;
 import com.sdu.irpc.framework.core.config.Configuration;
 import com.sdu.irpc.framework.core.config.RegistryConfig;
 import com.sdu.irpc.framework.core.config.ServiceConfig;
@@ -82,12 +85,12 @@ public class IRpcBootstrap {
      * 配置服务使用的序列化协议
      * 服务提供者或客户端都可以使用
      *
-     * @param serializeType 协议的封装
+     * @param serializationType 协议的封装
      * @return this当前实例
      */
-    public IRpcBootstrap serialize(String serializeType) {
-        configuration.setSerializationType(serializeType);
-        log.info("当前工程使用了：{}协议进行序列化", serializeType);
+    public IRpcBootstrap serialize(SerializationType serializationType) {
+        configuration.setSerializationType(serializationType.name());
+        log.info("当前工程使用了：{}协议进行序列化", serializationType.name());
         return this;
     }
 
@@ -95,12 +98,12 @@ public class IRpcBootstrap {
      * 配置服务使用的压缩方式
      * 服务提供者或客户端都可以使用
      *
-     * @param compression 传输压缩方式
+     * @param compressionType 传输压缩方式
      * @return this当前实例
      */
-    public IRpcBootstrap compression(String compression) {
-        configuration.setCompressionType(compression);
-        log.info("当前工程使用了：{}进行压缩", compression);
+    public IRpcBootstrap compress(CompressionType compressionType) {
+        configuration.setCompressionType(compressionType.name());
+        log.info("当前工程使用了【{}】进行压缩", compressionType.name());
         return this;
     }
 
@@ -113,6 +116,16 @@ public class IRpcBootstrap {
      */
     public IRpcBootstrap group(String groupName) {
         configuration.setGroupName(groupName);
+        return this;
+    }
+
+    /**
+     * 配置服务的负载均衡器
+     * @param loadBalancerType 负载均衡器类型
+     * @return this当前实例
+     */
+    public IRpcBootstrap loadbalancer(LoadBalancerType loadBalancerType) {
+        configuration.setLoadBalancer(loadBalancerType.name());
         return this;
     }
 

@@ -18,5 +18,5 @@ public interface Registry {
      * @param serviceName 服务的名称
      * @return 服务的地址
      */
-    List<InetSocketAddress> discover(String serviceName);
+    List<InetSocketAddress> discover(String appName, String serviceName);
 }

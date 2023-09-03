@@ -1,10 +1,10 @@
 package com.sdu.irpc.framework.core.config;
 
 import com.sdu.irpc.framework.common.constant.DefaultBoostrapConfig;
+import com.sdu.irpc.framework.common.enums.CompressionType;
+import com.sdu.irpc.framework.common.enums.LoadBalancerType;
+import com.sdu.irpc.framework.common.enums.SerializationType;
 import com.sdu.irpc.framework.common.util.IdGenerator;
-import com.sdu.irpc.framework.core.loadbalancer.LoadBalancer;
-import com.sdu.irpc.framework.core.loadbalancer.impl.ConsistentHashLoadBalancer;
-import com.sdu.irpc.framework.core.loadbalancer.impl.RoundRobinLoadBalancer;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,13 +18,13 @@ public class Configuration implements DefaultBoostrapConfig {
 
     private String groupName = DEFAULT_GROUP_NAME;
 
-    private String serializationType = DEFAULT_SERIALIZATION;
+    private String serializationType = SerializationType.JDK.name();
 
-    private String compressionType = DEFAULT_COMPRESSION;
+    private String compressionType = CompressionType.GZIP.name();
 
     private RegistryConfig registryConfig = new RegistryConfig(DEFAULT_REGISTRY_CONFIG);
 
     private IdGenerator idGenerator = new IdGenerator();
 
-    private LoadBalancer loadBalancer = new ConsistentHashLoadBalancer();
+    private String loadBalancer = LoadBalancerType.ROUND_ROBIN.name();
 }
