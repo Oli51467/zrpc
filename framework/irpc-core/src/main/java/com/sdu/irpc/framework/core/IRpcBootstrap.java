@@ -1,5 +1,6 @@
 package com.sdu.irpc.framework.core;
 
+import com.sdu.irpc.framework.common.annotation.IrpcService;
 import com.sdu.irpc.framework.common.enums.CompressionType;
 import com.sdu.irpc.framework.common.enums.LoadBalancerType;
 import com.sdu.irpc.framework.common.enums.SerializationType;
@@ -28,12 +29,16 @@ import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.util.concurrent.Future;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.File;
 import java.net.InetSocketAddress;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class IRpcBootstrap {
@@ -41,7 +46,7 @@ public class IRpcBootstrap {
     private static final IRpcBootstrap iRpcBootstrap = new IRpcBootstrap();
 
     // 维护已经发布且暴露的服务列表 (k, v) -> (接口的全限定名, ServiceConfig)
-    public static final Map<String, ServiceConfig<?>> SERVICE_MAP = new ConcurrentHashMap<>(8);
+    public static final Map<String, ServiceConfig> SERVICE_MAP = new ConcurrentHashMap<>(8);
     // 连接的缓存
     public static final Map<InetSocketAddress, Channel> CHANNEL_CACHE = new ConcurrentHashMap<>(8);
     // 对外挂起的completableFuture
@@ -147,6 +152,7 @@ public class IRpcBootstrap {
 
     /**
      * 配置服务的负载均衡器
+     *
      * @param loadBalancerType 负载均衡器类型
      * @return this当前实例
      */
@@ -218,7 +224,7 @@ public class IRpcBootstrap {
      * @param service 封装的需要发布的服务
      * @return this当前实例
      */
-    public IRpcBootstrap publish(ServiceConfig<?> service) {
+    public IRpcBootstrap publish(ServiceConfig service) {
         this.configuration.setServiceConfig(service);
         configuration.getRegistryConfig().getRegistry().register(service);
         // 维护该接口
@@ -232,10 +238,93 @@ public class IRpcBootstrap {
      * @param services 封装的需要发布的服务集合
      * @return this当前实例
      */
-    public IRpcBootstrap publish(List<ServiceConfig<?>> services) {
-        for (ServiceConfig<?> service : services) {
+    public IRpcBootstrap publish(List<ServiceConfig> services) {
+        for (ServiceConfig service : services) {
             this.publish(service);
         }
         return this;
+    }
+
+    /**
+     * 扫描包，进行批量注册
+     *
+     * @param packageName 包名
+     * @return this本身
+     */
+    public IRpcBootstrap scan(String packageName) {
+        // 1、需要通过packageName获取其下的所有的类的权限定名称
+        List<String> classNames = getAllClassNames(packageName);
+        List<Class<?>> classes = classNames.stream()
+                .map(className -> {
+                    try {
+                        return Class.forName(className);
+                    } catch (ClassNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+                }).filter(clazz -> clazz.getAnnotation(IrpcService.class) != null)
+                .collect(Collectors.toList());
+        for (Class<?> clazz : classes) {
+            // 获取接口
+            Class<?>[] interfaces = clazz.getInterfaces();
+            Object instance;
+            try {
+                instance = clazz.getConstructor().newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            IrpcService annotation = clazz.getAnnotation(IrpcService.class);
+            String group = annotation.group();
+
+            for (Class<?> i : interfaces) {
+                ServiceConfig serviceConfig = new ServiceConfig();
+                serviceConfig.setInterface(i);
+                serviceConfig.setReference(instance);
+                serviceConfig.setGroup(group);
+                serviceConfig.setApplicationName(IRpcBootstrap.getInstance().getConfiguration().getApplicationName());
+                log.info("---->已经通过包扫描，将服务【{}】发布.", i);
+                publish(serviceConfig);
+            }
+        }
+        return this;
+    }
+
+    private List<String> getAllClassNames(String packageName) {
+        String basePath = packageName.replaceAll("\\.", "/");
+        URL url = ClassLoader.getSystemClassLoader().getResource(basePath);
+        if (url == null) {
+            throw new RuntimeException("包扫描时，发现路径不存在.");
+        }
+        // 获取包所在的绝对路径
+        String absolutePath = url.getPath();
+        List<String> classNames = new ArrayList<>();
+        traverseFiles(absolutePath, classNames, basePath);
+        return classNames;
+    }
+
+    private void traverseFiles(String absolutePath, List<String> classNames, String basePath) {
+        File file = new File(absolutePath);
+        if (file.isDirectory()) {
+            File[] listFiles = file.listFiles(f -> f.isDirectory() || f.getPath().contains(".class"));
+            if (null == listFiles || listFiles.length == 0) {
+                return;
+            }
+            for (File listFile : listFiles) {
+                // 如果是文件夹则递归调用
+                if (listFile.isDirectory()) {
+                    traverseFiles(listFile.getAbsolutePath(), classNames, basePath);
+                } else {
+                    String className = getClassNameByAbsolutePath(listFile.getAbsolutePath(), basePath);
+                    classNames.add(className);
+                }
+            }
+        } else {
+            String className = getClassNameByAbsolutePath(absolutePath, basePath);
+            classNames.add(className);
+        }
+    }
+
+    private String getClassNameByAbsolutePath(String absolutePath, String basePath) {
+        String fullPath = absolutePath.substring(absolutePath.lastIndexOf(basePath));
+        return fullPath.substring(0, fullPath.lastIndexOf(".")).replace("/", ".");
     }
 }

@@ -28,5 +28,5 @@ public class Configuration implements DefaultBoostrapConfig {
 
     private LoadBalancerType loadBalancer = LoadBalancerType.ROUND_ROBIN;
 
-    private ServiceConfig<?> serviceConfig;
+    private ServiceConfig serviceConfig;
 }

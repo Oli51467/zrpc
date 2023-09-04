@@ -32,7 +32,7 @@ public class ZooKeeperRegistry extends AbstractRegistry {
     }
 
     @Override
-    public void register(ServiceConfig<?> service) {
+    public void register(ServiceConfig service) {
         // 服务名称的节点 最后一层是方法的全类名
         // 路径是 /providers/appName/methodName/ip1, ip2,...
         String applicationNode = getProviderNodePath(service.getApplicationName());

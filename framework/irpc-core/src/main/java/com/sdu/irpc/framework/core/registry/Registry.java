@@ -11,7 +11,7 @@ public interface Registry {
      * 注册服务
      * @param serviceConfig 服务的配置内容
      */
-    void register(ServiceConfig<?> serviceConfig);
+    void register(ServiceConfig serviceConfig);
 
     /**
      * 从注册中心拉取服务列表
