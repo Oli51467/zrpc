@@ -1,16 +1,13 @@
 package com.sdu.irpc.framework.core.proxy;
 
+import com.sdu.irpc.framework.common.entity.rpc.RequestPayload;
+import com.sdu.irpc.framework.common.entity.rpc.RpcRequest;
 import com.sdu.irpc.framework.common.entity.rpc.RpcRequestHolder;
 import com.sdu.irpc.framework.common.enums.RequestType;
 import com.sdu.irpc.framework.common.exception.DiscoveryException;
 import com.sdu.irpc.framework.common.exception.NetworkException;
 import com.sdu.irpc.framework.core.IRpcBootstrap;
 import com.sdu.irpc.framework.core.NettyBoostrapInitializer;
-import com.sdu.irpc.framework.core.compressor.CompressorFactory;
-import com.sdu.irpc.framework.core.loadbalancer.LoadBalancerFactory;
-import com.sdu.irpc.framework.core.serializer.SerializerFactory;
-import com.sdu.irpc.framework.common.entity.rpc.RequestPayload;
-import com.sdu.irpc.framework.common.entity.rpc.RpcRequest;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import lombok.extern.slf4j.Slf4j;
@@ -46,17 +43,18 @@ public class RpcClientInvocationHandler implements InvocationHandler {
                 .build();
         // 2.创建一个请求
         RpcRequest request = RpcRequest.builder()
-                .requestId(IRpcBootstrap.getInstance().getConfiguration().getIdGenerator().getId())
-                .compressionType(CompressorFactory.getCompressor(IRpcBootstrap.getInstance().getConfiguration().getCompressionType()).getCode())
+                .requestId(IRpcBootstrap.getInstance().getIdGenerator().getId())
+                .compressionType(IRpcBootstrap.getInstance().getCompressor())
                 .requestType(RequestType.REQUEST.getCode())
-                .serializationType(SerializerFactory.getSerializer(IRpcBootstrap.getInstance().getConfiguration().getSerializationType()).getCode())
+                .serializationType(IRpcBootstrap.getInstance().getSerializer())
                 .timeStamp(System.currentTimeMillis())
                 .requestPayload(requestPayload)
                 .build();
+        // 将请求存入本地线程
         RpcRequestHolder.set(request);
 
         // 3.寻找该服务的可用节点，通过客户端负载均衡寻找一个可用的服务
-        InetSocketAddress address = LoadBalancerFactory.getLoadbalancer(IRpcBootstrap.getInstance().getConfiguration().getLoadBalancer()).getImpl().selectService(appName, targetInterface.getName());
+        InetSocketAddress address = IRpcBootstrap.getInstance().getLoadBalancer().selectService(appName, targetInterface.getName());
         log.info("发现服务【{}】的提供者: {}", targetInterface.getName(), address);
         Channel channel = getChannel(address);
         // 4.异步发送报文 并将该任务挂起
@@ -68,8 +66,9 @@ public class RpcClientInvocationHandler implements InvocationHandler {
                 completableFuture.completeExceptionally(promise.cause());
             }
         });
+        Object result = completableFuture.get(3, TimeUnit.SECONDS);
         RpcRequestHolder.remove();
-        return completableFuture.get(3, TimeUnit.SECONDS);
+        return result;
     }
 
     /**

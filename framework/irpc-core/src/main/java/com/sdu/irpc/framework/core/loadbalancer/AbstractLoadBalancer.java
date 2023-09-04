@@ -19,10 +19,9 @@ public abstract class AbstractLoadBalancer implements LoadBalancer {
         // 如果没有，就需要为这个service创建一个selector
         if (null == selector) {
             // 注册中心服务发现所有可用的节点
-            List<InetSocketAddress> serviceList = IRpcBootstrap.getInstance()
-                    .getConfiguration().getRegistryConfig().getRegistry().discover(appName, serviceName);
+            List<InetSocketAddress> serviceList = IRpcBootstrap.getInstance().getRegistry().discover(appName, serviceName);
             // 具体的选择逻辑由子类实现
-            selector = getSelector(serviceList);
+            selector = initSelector(serviceList);
             // 将select放入缓存当中
             selectorCache.put(serviceName, selector);
         }
@@ -31,9 +30,9 @@ public abstract class AbstractLoadBalancer implements LoadBalancer {
     }
 
     @Override
-    public void reloadService(String serviceName, List<InetSocketAddress> addresses) {
-
+    public synchronized void reload(String serviceName, List<InetSocketAddress> serviceList) {
+        selectorCache.put(serviceName, initSelector(serviceList));
     }
 
-    protected abstract Selector getSelector(List<InetSocketAddress> serviceList);
+    protected abstract Selector initSelector(List<InetSocketAddress> serviceList);
 }

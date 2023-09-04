@@ -3,18 +3,13 @@ package com.sdu.irpc.framework.core;
 import com.sdu.irpc.framework.common.entity.rpc.RpcRequest;
 import com.sdu.irpc.framework.common.enums.RequestType;
 import com.sdu.irpc.framework.common.exception.NetworkException;
-import com.sdu.irpc.framework.core.compressor.CompressorFactory;
 import com.sdu.irpc.framework.core.registry.Registry;
-import com.sdu.irpc.framework.core.serializer.SerializerFactory;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -28,7 +23,7 @@ public class HeartbeatDetector {
 
     public HeartbeatDetector(String appName, String serviceName) {
         // 获取注册中心
-        Registry registry = IRpcBootstrap.getInstance().getConfiguration().getRegistryConfig().getRegistry();
+        Registry registry = IRpcBootstrap.getInstance().getRegistry();
         // 通过注册中心发现所有服务列表(InetSocketAddress)
         List<InetSocketAddress> serviceList = registry.discover(appName, serviceName);
         // 将每个连接维护在缓存中，如果没有连接，则建立连接
@@ -58,35 +53,53 @@ public class HeartbeatDetector {
             Map<InetSocketAddress, Channel> cache = IRpcBootstrap.CHANNEL_CACHE;
 
             for (Map.Entry<InetSocketAddress, Channel> entry : cache.entrySet()) {
-                Channel channel = entry.getValue();
-                long startTime = System.currentTimeMillis();
-                // 构建一个心跳请求
-                RpcRequest request = RpcRequest.builder()
-                        .requestId(IRpcBootstrap.getInstance().getConfiguration().getIdGenerator().getId())
-                        .compressionType(CompressorFactory.getCompressor(IRpcBootstrap.getInstance().getConfiguration().getCompressionType()).getCode())
-                        .requestType(RequestType.HEART_BEAT.getCode())
-                        .serializationType(SerializerFactory.getSerializer(IRpcBootstrap.getInstance().getConfiguration().getSerializationType()).getCode())
-                        .timeStamp(startTime)
-                        .build();
-                CompletableFuture<Object> completableFuture = new CompletableFuture<>();
-                IRpcBootstrap.PENDING_REQUEST.put(request.getRequestId(), completableFuture);
-                // 发送心跳包信息
-                channel.writeAndFlush(request).addListener((ChannelFutureListener) promise -> {
-                    if (!promise.isSuccess()) {
-                        completableFuture.completeExceptionally(promise.cause());
-                    }
-                });
+                int retryTimes = 3;
+                while (retryTimes > 0) {
+                    Channel channel = entry.getValue();
+                    long startTime = System.currentTimeMillis();
+                    // 构建一个心跳请求
+                    RpcRequest request = RpcRequest.builder()
+                            .requestId(IRpcBootstrap.getInstance().getIdGenerator().getId())
+                            .compressionType(IRpcBootstrap.getInstance().getCompressor())
+                            .requestType(RequestType.HEART_BEAT.getCode())
+                            .serializationType(IRpcBootstrap.getInstance().getSerializer())
+                            .timeStamp(startTime)
+                            .build();
+                    CompletableFuture<Object> completableFuture = new CompletableFuture<>();
+                    IRpcBootstrap.PENDING_REQUEST.put(request.getRequestId(), completableFuture);
+                    // 发送心跳包信息
+                    channel.writeAndFlush(request).addListener((ChannelFutureListener) promise -> {
+                        if (!promise.isSuccess()) {
+                            completableFuture.completeExceptionally(promise.cause());
+                        }
+                    });
 
-                long endTime;
-                try {
-                    completableFuture.get(2, TimeUnit.SECONDS);
-                    endTime = System.currentTimeMillis();
-                    // 使用treemap缓存响应时间
-                    IRpcBootstrap.RESPONSE_TIME_CACHE.put(endTime - startTime, channel);
-                } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                    throw new RuntimeException(e);
+                    long endTime;
+                    try {
+                        completableFuture.get(2, TimeUnit.SECONDS);
+                        endTime = System.currentTimeMillis();
+                        // 使用treemap缓存响应时间
+                        IRpcBootstrap.RESPONSE_TIME_CACHE.put(endTime - startTime, channel);
+                    } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                        // 一旦发生问题，需要优先重试
+                        retryTimes--;
+                        log.error("和地址为【{}】的主机连接发生异常.正在进行第【{}】次重试......",
+                                channel.remoteAddress(), 3 - retryTimes);
+                        // 将重试的机会用尽，将失效的地址移出服务列表
+                        if (retryTimes == 0) {
+                            IRpcBootstrap.CHANNEL_CACHE.remove(entry.getKey());
+                        }
+                        // 尝试等到一段时间后重试
+                        try {
+                            Thread.sleep(10 * (new Random().nextInt(50)));
+                        } catch (InterruptedException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                        continue;
+                    }
+                    log.info("和[{}]服务器的响应时间是[{}].", entry.getKey(), endTime - startTime);
+                    break;
                 }
-                log.info("和[{}]服务器的响应时间是[{}].", entry.getKey(), endTime - startTime);
             }
         }
     }

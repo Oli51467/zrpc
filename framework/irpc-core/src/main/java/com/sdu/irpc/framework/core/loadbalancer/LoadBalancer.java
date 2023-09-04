@@ -21,5 +21,5 @@ public interface LoadBalancer {
      *
      * @param serviceName 服务的名称
      */
-    void reloadService(String serviceName, List<InetSocketAddress> addresses);
+    void reload(String serviceName, List<InetSocketAddress> addresses);
 }

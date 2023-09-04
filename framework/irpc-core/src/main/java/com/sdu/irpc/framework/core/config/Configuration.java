@@ -18,13 +18,15 @@ public class Configuration implements DefaultBoostrapConfig {
 
     private String groupName = DEFAULT_GROUP_NAME;
 
-    private String serializationType = SerializationType.JDK.name();
+    private SerializationType serializationType = SerializationType.JDK;
 
-    private String compressionType = CompressionType.GZIP.name();
+    private CompressionType compressionType = CompressionType.GZIP;
 
     private RegistryConfig registryConfig = new RegistryConfig(DEFAULT_REGISTRY_CONFIG);
 
     private IdGenerator idGenerator = new IdGenerator();
 
-    private String loadBalancer = LoadBalancerType.ROUND_ROBIN.name();
+    private LoadBalancerType loadBalancer = LoadBalancerType.ROUND_ROBIN;
+
+    private ServiceConfig<?> serviceConfig;
 }

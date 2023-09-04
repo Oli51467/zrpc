@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RoundRobinLoadBalancer extends AbstractLoadBalancer {
 
     @Override
-    protected Selector getSelector(List<InetSocketAddress> serviceList) {
+    protected Selector initSelector(List<InetSocketAddress> serviceList) {
         return new RoundRobinSelector(serviceList);
     }
 
@@ -22,7 +22,6 @@ public class RoundRobinLoadBalancer extends AbstractLoadBalancer {
      * 如果内部类不会引用到外部类，强烈建议使用静态内部类节省资源，减少内部类其中的一个指向外部类的引用。
      */
     private static class RoundRobinSelector implements Selector {
-
         private List<InetSocketAddress> serviceList;
         private AtomicInteger index;
 

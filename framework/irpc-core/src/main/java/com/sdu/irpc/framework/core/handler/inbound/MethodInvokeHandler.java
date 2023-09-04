@@ -1,12 +1,13 @@
 package com.sdu.irpc.framework.core.handler.inbound;
 
+import com.sdu.irpc.framework.common.entity.ShutdownHolder;
+import com.sdu.irpc.framework.common.entity.rpc.RequestPayload;
+import com.sdu.irpc.framework.common.entity.rpc.RpcRequest;
+import com.sdu.irpc.framework.common.entity.rpc.RpcResponse;
 import com.sdu.irpc.framework.common.enums.RequestType;
 import com.sdu.irpc.framework.common.enums.RespCode;
 import com.sdu.irpc.framework.core.IRpcBootstrap;
 import com.sdu.irpc.framework.core.config.ServiceConfig;
-import com.sdu.irpc.framework.common.entity.rpc.RequestPayload;
-import com.sdu.irpc.framework.common.entity.rpc.RpcRequest;
-import com.sdu.irpc.framework.common.entity.rpc.RpcResponse;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -29,6 +30,11 @@ public class MethodInvokeHandler extends SimpleChannelInboundHandler<RpcRequest>
         response.setSerializationType(request.getSerializationType());
         // 获得通道
         Channel channel = channelHandlerContext.channel();
+        if (ShutdownHolder.BAFFLE.get()) {
+            response.setCode(RespCode.CLOSING.getCode());
+            channel.writeAndFlush(response);
+            return;
+        }
         // 拿到真正的payload
         if (request.getRequestType() == RequestType.HEART_BEAT.getCode()) {
             response.setCode(RespCode.SUCCESS_HEART_BEAT.getCode());

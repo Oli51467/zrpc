@@ -17,7 +17,7 @@ import java.util.Map;
 public class ResponseTimeLoadBalancer extends AbstractLoadBalancer {
 
     @Override
-    protected Selector getSelector(List<InetSocketAddress> serviceList) {
+    protected Selector initSelector(List<InetSocketAddress> serviceList) {
         return new ResponseTimeSelector();
     }
 

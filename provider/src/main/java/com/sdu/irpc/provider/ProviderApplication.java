@@ -19,7 +19,7 @@ public class ProviderApplication {
         // 配置应用名、序列化协议、压缩方式并发布服务
         IRpcBootstrap.getInstance()
                 .application("p1")
-                .port(8091)
+                .port(8098)
                 .publish(service)
                 .start();
     }

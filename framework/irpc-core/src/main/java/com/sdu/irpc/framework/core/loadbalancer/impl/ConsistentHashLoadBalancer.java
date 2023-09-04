@@ -21,7 +21,7 @@ import java.util.TreeMap;
 public class ConsistentHashLoadBalancer extends AbstractLoadBalancer {
 
     @Override
-    protected Selector getSelector(List<InetSocketAddress> serviceList) {
+    protected Selector initSelector(List<InetSocketAddress> serviceList) {
         try {
             return new ConsistentHashSelector(serviceList, 128);
         } catch (NoSuchAlgorithmException e) {
@@ -66,7 +66,6 @@ public class ConsistentHashLoadBalancer extends AbstractLoadBalancer {
             for (int i = 0; i < this.virtualNodesCount; i++) {
                 int hash = calHash(socketAddress.toString() + "-" + i);
                 circle.put(hash, socketAddress);
-                log.info("hash为[{}]的节点已经挂载到了哈希环上.", hash);
             }
         }
 

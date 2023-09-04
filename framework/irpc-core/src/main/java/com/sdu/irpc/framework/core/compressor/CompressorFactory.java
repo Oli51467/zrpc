@@ -11,12 +11,12 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class CompressorFactory {
 
-    private final static Map<String, ObjectWrapper<Compressor>> COMPRESSOR_CACHE = new ConcurrentHashMap<>(8);
+    private final static Map<CompressionType, ObjectWrapper<Compressor>> COMPRESSOR_CACHE = new ConcurrentHashMap<>(8);
     private final static Map<Byte, ObjectWrapper<Compressor>> COMPRESSOR_CODE_CACHE = new ConcurrentHashMap<>(8);
 
     static {
         ObjectWrapper<Compressor> gzip = new ObjectWrapper<>((byte) 1, CompressionType.GZIP.name(), new GzipCompressor());
-        COMPRESSOR_CACHE.put(CompressionType.GZIP.name(), gzip);
+        COMPRESSOR_CACHE.put(CompressionType.GZIP, gzip);
         COMPRESSOR_CODE_CACHE.put((byte) 1, gzip);
     }
 
@@ -26,11 +26,11 @@ public class CompressorFactory {
      * @param compressorType 序列化的类型
      * @return CompressWrapper
      */
-    public static ObjectWrapper<Compressor> getCompressor(String compressorType) {
+    public static ObjectWrapper<Compressor> getCompressor(CompressionType compressorType) {
         ObjectWrapper<Compressor> compressorObjectWrapper = COMPRESSOR_CACHE.get(compressorType);
         if (compressorObjectWrapper == null) {
             log.error("未找到您配置的【{}】压缩算法，默认选用gzip算法。", compressorType);
-            return COMPRESSOR_CACHE.get(CompressionType.GZIP.name());
+            return COMPRESSOR_CACHE.get(CompressionType.GZIP);
         }
         return compressorObjectWrapper;
     }
@@ -42,15 +42,5 @@ public class CompressorFactory {
             return COMPRESSOR_CACHE.get(CompressionType.GZIP.name());
         }
         return compressorObjectWrapper;
-    }
-
-    /**
-     * 给工厂中新增一个压缩方式
-     *
-     * @param compressorObjectWrapper 压缩类型的包装
-     */
-    public static void addCompressor(ObjectWrapper<Compressor> compressorObjectWrapper) {
-        COMPRESSOR_CACHE.put(compressorObjectWrapper.getName(), compressorObjectWrapper);
-        COMPRESSOR_CODE_CACHE.put(compressorObjectWrapper.getCode(), compressorObjectWrapper);
     }
 }

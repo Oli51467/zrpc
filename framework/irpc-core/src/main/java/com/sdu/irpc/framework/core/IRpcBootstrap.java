@@ -3,6 +3,8 @@ package com.sdu.irpc.framework.core;
 import com.sdu.irpc.framework.common.enums.CompressionType;
 import com.sdu.irpc.framework.common.enums.LoadBalancerType;
 import com.sdu.irpc.framework.common.enums.SerializationType;
+import com.sdu.irpc.framework.common.util.IdGenerator;
+import com.sdu.irpc.framework.core.compressor.CompressorFactory;
 import com.sdu.irpc.framework.core.config.Configuration;
 import com.sdu.irpc.framework.core.config.RegistryConfig;
 import com.sdu.irpc.framework.core.config.ServiceConfig;
@@ -10,6 +12,10 @@ import com.sdu.irpc.framework.core.handler.inbound.HttpHeadersHandler;
 import com.sdu.irpc.framework.core.handler.inbound.MethodInvokeHandler;
 import com.sdu.irpc.framework.core.handler.inbound.RequestMessageDecoder;
 import com.sdu.irpc.framework.core.handler.outbound.ResponseMessageEncoder;
+import com.sdu.irpc.framework.core.loadbalancer.LoadBalancer;
+import com.sdu.irpc.framework.core.loadbalancer.LoadBalancerFactory;
+import com.sdu.irpc.framework.core.registry.Registry;
+import com.sdu.irpc.framework.core.serializer.SerializerFactory;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -57,6 +63,26 @@ public class IRpcBootstrap {
         return configuration;
     }
 
+    public Registry getRegistry() {
+        return getConfiguration().getRegistryConfig().getRegistry();
+    }
+
+    public LoadBalancer getLoadBalancer() {
+        return LoadBalancerFactory.getLoadbalancer(getConfiguration().getLoadBalancer()).getImpl();
+    }
+
+    public Byte getSerializer() {
+        return SerializerFactory.getSerializer(getConfiguration().getSerializationType()).getCode();
+    }
+
+    public Byte getCompressor() {
+        return CompressorFactory.getCompressor(getConfiguration().getCompressionType()).getCode();
+    }
+
+    public IdGenerator getIdGenerator() {
+        return getConfiguration().getIdGenerator();
+    }
+
     /**
      * 用来定义当前应用的名字
      * 服务提供者或客户端都可以使用
@@ -89,8 +115,8 @@ public class IRpcBootstrap {
      * @return this当前实例
      */
     public IRpcBootstrap serialize(SerializationType serializationType) {
-        configuration.setSerializationType(serializationType.name());
-        log.info("当前工程使用了：{}协议进行序列化", serializationType.name());
+        configuration.setSerializationType(serializationType);
+        log.info("当前工程使用了：{}协议进行序列化", serializationType);
         return this;
     }
 
@@ -102,8 +128,8 @@ public class IRpcBootstrap {
      * @return this当前实例
      */
     public IRpcBootstrap compress(CompressionType compressionType) {
-        configuration.setCompressionType(compressionType.name());
-        log.info("当前工程使用了【{}】进行压缩", compressionType.name());
+        configuration.setCompressionType(compressionType);
+        log.info("当前工程使用了【{}】进行压缩", compressionType);
         return this;
     }
 
@@ -125,7 +151,8 @@ public class IRpcBootstrap {
      * @return this当前实例
      */
     public IRpcBootstrap loadbalancer(LoadBalancerType loadBalancerType) {
-        configuration.setLoadBalancer(loadBalancerType.name());
+        configuration.setLoadBalancer(loadBalancerType);
+        log.info("当前工程使用了【{}】进行负载均衡", loadBalancerType);
         return this;
     }
 
@@ -144,6 +171,8 @@ public class IRpcBootstrap {
      * 启动netty服务
      */
     public void start() {
+        // 注册关闭应用程序的钩子函数
+        Runtime.getRuntime().addShutdownHook(new NettyShutdownHook());
         EventLoopGroup masterGroup = new NioEventLoopGroup(2);
         EventLoopGroup workerGroup = new NioEventLoopGroup(10);
         try {
@@ -190,6 +219,7 @@ public class IRpcBootstrap {
      * @return this当前实例
      */
     public IRpcBootstrap publish(ServiceConfig<?> service) {
+        this.configuration.setServiceConfig(service);
         configuration.getRegistryConfig().getRegistry().register(service);
         // 维护该接口
         SERVICE_MAP.put(service.getInterface().getName(), service);
