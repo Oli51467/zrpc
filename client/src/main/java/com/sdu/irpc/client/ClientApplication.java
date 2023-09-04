@@ -1,9 +1,8 @@
 package com.sdu.irpc.client;
 
 import com.sdu.irpc.api.Greet;
-import com.sdu.irpc.framework.common.enums.LoadBalancerType;
 import com.sdu.irpc.framework.common.enums.SerializationType;
-import com.sdu.irpc.framework.core.IRpcBootstrap;
+import com.sdu.irpc.framework.core.config.IRpcBootstrap;
 import com.sdu.irpc.framework.core.config.ReferenceConfig;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,8 +16,7 @@ public class ClientApplication {
         reference.setAppName("p1");
         Greet proxy = reference.get();
         IRpcBootstrap.getInstance()
-                .serialize(SerializationType.HESSIAN)
-                .loadbalancer(LoadBalancerType.RESPONSE_TIME);
+                .serialize(SerializationType.HESSIAN);
         /* 代理：
          * 1. 连接注册中心
          * 2. 拉取服务列表

@@ -3,7 +3,7 @@ package com.sdu.irpc.provider.impl;
 import com.sdu.irpc.api.Greet;
 import com.sdu.irpc.framework.common.annotation.IrpcService;
 
-@IrpcService
+@IrpcService(application = "p1")
 public class GreetImpl implements Greet {
 
     @Override

@@ -9,5 +9,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface IrpcService {
 
-    String group() default "default";
+    String application() default "default";
 }

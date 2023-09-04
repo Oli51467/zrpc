@@ -1,8 +1,8 @@
 package com.sdu.irpc.framework.core.watcher;
 
 import com.sdu.irpc.framework.common.exception.NetworkException;
-import com.sdu.irpc.framework.core.IRpcBootstrap;
-import com.sdu.irpc.framework.core.NettyBoostrapInitializer;
+import com.sdu.irpc.framework.core.config.IRpcBootstrap;
+import com.sdu.irpc.framework.core.netty.NettyBoostrapInitializer;
 import com.sdu.irpc.framework.core.registry.Registry;
 import io.netty.channel.Channel;
 import lombok.SneakyThrows;

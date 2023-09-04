@@ -1,6 +1,7 @@
 package com.sdu.irpc.framework.core.config;
 
 import com.sdu.irpc.framework.common.constant.DefaultBoostrapConfig;
+import com.sdu.irpc.framework.common.entity.rpc.ServiceConfig;
 import com.sdu.irpc.framework.common.enums.CompressionType;
 import com.sdu.irpc.framework.common.enums.LoadBalancerType;
 import com.sdu.irpc.framework.common.enums.SerializationType;
@@ -13,10 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 public class Configuration implements DefaultBoostrapConfig {
 
     private Integer port = DEFAULT_PORT;
-
-    private String applicationName = DEFAULT_APPLICATION_NAME;
-
-    private String groupName = DEFAULT_GROUP_NAME;
 
     private SerializationType serializationType = SerializationType.JDK;
 

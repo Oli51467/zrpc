@@ -1,20 +1,19 @@
-package com.sdu.irpc.framework.core;
+package com.sdu.irpc.framework.core.config;
 
-import com.sdu.irpc.framework.common.annotation.IrpcService;
+import com.sdu.irpc.framework.common.entity.rpc.ServiceConfig;
 import com.sdu.irpc.framework.common.enums.CompressionType;
 import com.sdu.irpc.framework.common.enums.LoadBalancerType;
 import com.sdu.irpc.framework.common.enums.SerializationType;
+import com.sdu.irpc.framework.common.util.FileUtil;
 import com.sdu.irpc.framework.common.util.IdGenerator;
 import com.sdu.irpc.framework.core.compressor.CompressorFactory;
-import com.sdu.irpc.framework.core.config.Configuration;
-import com.sdu.irpc.framework.core.config.RegistryConfig;
-import com.sdu.irpc.framework.core.config.ServiceConfig;
 import com.sdu.irpc.framework.core.handler.inbound.HttpHeadersHandler;
 import com.sdu.irpc.framework.core.handler.inbound.MethodInvokeHandler;
 import com.sdu.irpc.framework.core.handler.inbound.RequestMessageDecoder;
 import com.sdu.irpc.framework.core.handler.outbound.ResponseMessageEncoder;
 import com.sdu.irpc.framework.core.loadbalancer.LoadBalancer;
 import com.sdu.irpc.framework.core.loadbalancer.LoadBalancerFactory;
+import com.sdu.irpc.framework.core.netty.NettyShutdownHook;
 import com.sdu.irpc.framework.core.registry.Registry;
 import com.sdu.irpc.framework.core.serializer.SerializerFactory;
 import io.netty.bootstrap.ServerBootstrap;
@@ -29,16 +28,12 @@ import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.util.concurrent.Future;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.File;
 import java.net.InetSocketAddress;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class IRpcBootstrap {
@@ -89,18 +84,6 @@ public class IRpcBootstrap {
     }
 
     /**
-     * 用来定义当前应用的名字
-     * 服务提供者或客户端都可以使用
-     *
-     * @param applicationName 应用的名字
-     * @return this当前实例
-     */
-    public IRpcBootstrap application(String applicationName) {
-        configuration.setApplicationName(applicationName);
-        return this;
-    }
-
-    /**
      * 用来配置一个注册中心
      * 服务提供者或客户端都可以使用
      *
@@ -135,18 +118,6 @@ public class IRpcBootstrap {
     public IRpcBootstrap compress(CompressionType compressionType) {
         configuration.setCompressionType(compressionType);
         log.info("当前工程使用了【{}】进行压缩", compressionType);
-        return this;
-    }
-
-    /**
-     * 配置服务使用组名
-     * 服务提供者或客户端都可以使用
-     *
-     * @param groupName 组名
-     * @return this当前实例
-     */
-    public IRpcBootstrap group(String groupName) {
-        configuration.setGroupName(groupName);
         return this;
     }
 
@@ -222,14 +193,12 @@ public class IRpcBootstrap {
      * 服务提供方发布服务，将接口的实现注册到服务中心
      *
      * @param service 封装的需要发布的服务
-     * @return this当前实例
      */
-    public IRpcBootstrap publish(ServiceConfig service) {
+    public void publish(ServiceConfig service) {
         this.configuration.setServiceConfig(service);
         configuration.getRegistryConfig().getRegistry().register(service);
         // 维护该接口
         SERVICE_MAP.put(service.getInterface().getName(), service);
-        return this;
     }
 
     /**
@@ -253,78 +222,9 @@ public class IRpcBootstrap {
      */
     public IRpcBootstrap scan(String packageName) {
         // 1、需要通过packageName获取其下的所有的类的权限定名称
-        List<String> classNames = getAllClassNames(packageName);
-        List<Class<?>> classes = classNames.stream()
-                .map(className -> {
-                    try {
-                        return Class.forName(className);
-                    } catch (ClassNotFoundException e) {
-                        throw new RuntimeException(e);
-                    }
-                }).filter(clazz -> clazz.getAnnotation(IrpcService.class) != null)
-                .collect(Collectors.toList());
-        for (Class<?> clazz : classes) {
-            // 获取接口
-            Class<?>[] interfaces = clazz.getInterfaces();
-            Object instance;
-            try {
-                instance = clazz.getConstructor().newInstance();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            IrpcService annotation = clazz.getAnnotation(IrpcService.class);
-            String group = annotation.group();
-
-            for (Class<?> i : interfaces) {
-                ServiceConfig serviceConfig = new ServiceConfig();
-                serviceConfig.setInterface(i);
-                serviceConfig.setReference(instance);
-                serviceConfig.setGroup(group);
-                serviceConfig.setApplicationName(IRpcBootstrap.getInstance().getConfiguration().getApplicationName());
-                log.info("---->已经通过包扫描，将服务【{}】发布.", i);
-                publish(serviceConfig);
-            }
-        }
-        return this;
-    }
-
-    private List<String> getAllClassNames(String packageName) {
-        String basePath = packageName.replaceAll("\\.", "/");
-        URL url = ClassLoader.getSystemClassLoader().getResource(basePath);
-        if (url == null) {
-            throw new RuntimeException("包扫描时，发现路径不存在.");
-        }
-        // 获取包所在的绝对路径
-        String absolutePath = url.getPath();
-        List<String> classNames = new ArrayList<>();
-        traverseFiles(absolutePath, classNames, basePath);
-        return classNames;
-    }
-
-    private void traverseFiles(String absolutePath, List<String> classNames, String basePath) {
-        File file = new File(absolutePath);
-        if (file.isDirectory()) {
-            File[] listFiles = file.listFiles(f -> f.isDirectory() || f.getPath().contains(".class"));
-            if (null == listFiles || listFiles.length == 0) {
-                return;
-            }
-            for (File listFile : listFiles) {
-                // 如果是文件夹则递归调用
-                if (listFile.isDirectory()) {
-                    traverseFiles(listFile.getAbsolutePath(), classNames, basePath);
-                } else {
-                    String className = getClassNameByAbsolutePath(listFile.getAbsolutePath(), basePath);
-                    classNames.add(className);
-                }
-            }
-        } else {
-            String className = getClassNameByAbsolutePath(absolutePath, basePath);
-            classNames.add(className);
-        }
-    }
-
-    private String getClassNameByAbsolutePath(String absolutePath, String basePath) {
-        String fullPath = absolutePath.substring(absolutePath.lastIndexOf(basePath));
-        return fullPath.substring(0, fullPath.lastIndexOf(".")).replace("/", ".");
+        List<String> classNames = FileUtil.getAllClassNames(packageName);
+        List<Class<?>> classes = FileUtil.filterClassWithAnnotation(classNames);
+        List<ServiceConfig> serviceConfigList = FileUtil.createConfigWithClasses(classes);
+        return publish(serviceConfigList);
     }
 }

@@ -1,6 +1,6 @@
 package com.sdu.irpc.framework.core.loadbalancer.impl;
 
-import com.sdu.irpc.framework.core.IRpcBootstrap;
+import com.sdu.irpc.framework.core.config.IRpcBootstrap;
 import com.sdu.irpc.framework.core.loadbalancer.AbstractLoadBalancer;
 import com.sdu.irpc.framework.core.loadbalancer.Selector;
 import io.netty.channel.Channel;

@@ -5,7 +5,7 @@ import com.sdu.irpc.framework.common.entity.rpc.RpcRequestHolder;
 import com.sdu.irpc.framework.common.entity.rpc.RpcResponse;
 import com.sdu.irpc.framework.common.enums.RespCode;
 import com.sdu.irpc.framework.common.exception.ResponseException;
-import com.sdu.irpc.framework.core.IRpcBootstrap;
+import com.sdu.irpc.framework.core.config.IRpcBootstrap;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;

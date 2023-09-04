@@ -1,6 +1,6 @@
 package com.sdu.irpc.framework.core.loadbalancer;
 
-import com.sdu.irpc.framework.core.IRpcBootstrap;
+import com.sdu.irpc.framework.core.config.IRpcBootstrap;
 
 import java.net.InetSocketAddress;
 import java.util.List;

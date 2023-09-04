@@ -1,4 +1,4 @@
-package com.sdu.irpc.framework.core;
+package com.sdu.irpc.framework.core.netty;
 
 import com.sdu.irpc.framework.core.handler.ClientChannelHandler;
 import io.netty.bootstrap.Bootstrap;

@@ -1,14 +1,10 @@
-package com.sdu.irpc.framework.core.config;
-
-import com.sdu.irpc.framework.common.constant.RpcMessageConstant;
-import com.sdu.irpc.framework.common.constant.ZooKeeperConstant;
+package com.sdu.irpc.framework.common.entity.rpc;
 
 public class ServiceConfig {
 
     private Class<?> rawInterface;
     private Object reference;
     private String applicationName;
-    private String group = "default";
 
     public Class<?> getInterface() {
         return rawInterface;
@@ -32,13 +28,5 @@ public class ServiceConfig {
 
     public void setApplicationName(String applicationName) {
         this.applicationName = applicationName;
-    }
-
-    public void setGroup(String group) {
-        this.group = group;
-    }
-
-    public String getGroup() {
-        return group;
     }
 }
