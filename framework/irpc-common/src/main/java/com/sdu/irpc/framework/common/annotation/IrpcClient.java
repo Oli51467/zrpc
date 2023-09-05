@@ -7,9 +7,13 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface IrpcService {
+public @interface IrpcClient {
 
     String application() default "default";
 
-    String path() default "/";
+    String path() default "";
+
+    int retry() default 0;
+
+    int interval() default 2000;
 }

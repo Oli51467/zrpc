@@ -39,7 +39,7 @@ public class JsonSerializer implements Serializer {
         Serializer serializer = new JsonSerializer();
 
         RequestPayload requestPayload = new RequestPayload();
-        requestPayload.setInterfaceName("interface");
+        requestPayload.setPath("/test");
         requestPayload.setMethodName("yyy");
         requestPayload.setParametersValue(new Object[]{"abc"});
 

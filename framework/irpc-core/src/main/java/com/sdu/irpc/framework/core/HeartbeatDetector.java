@@ -23,11 +23,11 @@ public class HeartbeatDetector {
     // 定义一个定时任务，每隔3秒去和每一个连接探活并维护每个连接的响应时间
     private final Thread thread = new Thread(() -> new Timer().scheduleAtFixedRate(new HeartbeatTimerTask(), 0, 3000));
 
-    public HeartbeatDetector(String appName, String serviceName) {
+    public HeartbeatDetector(String appName, String path) {
         // 获取注册中心
         Registry registry = IRpcBootstrap.getInstance().getRegistry();
         // 通过注册中心发现所有服务列表(InetSocketAddress)
-        List<InetSocketAddress> serviceList = registry.discover(appName, serviceName);
+        List<InetSocketAddress> serviceList = registry.discover(appName, path);
         // 将每个连接维护在缓存中，如果没有连接，则建立连接
         for (InetSocketAddress socketAddress : serviceList) {
             if (!IRpcBootstrap.CHANNEL_CACHE.containsKey(socketAddress)) {

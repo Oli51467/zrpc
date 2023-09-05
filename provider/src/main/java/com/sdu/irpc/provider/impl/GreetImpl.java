@@ -1,12 +1,12 @@
 package com.sdu.irpc.provider.impl;
 
-import com.sdu.irpc.api.Greet;
+import com.sdu.irpc.framework.common.annotation.IrpcMapping;
 import com.sdu.irpc.framework.common.annotation.IrpcService;
 
-@IrpcService(application = "p1")
-public class GreetImpl implements Greet {
+@IrpcService(application = "p1", path = "/greet")
+public class GreetImpl {
 
-    @Override
+    @IrpcMapping(path = "/echo")
     public String greet(String message) {
         return "Server echo greeting!";
     }

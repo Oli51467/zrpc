@@ -195,10 +195,9 @@ public class IRpcBootstrap {
      * @param service 封装的需要发布的服务
      */
     public void publish(ServiceConfig service) {
-        this.configuration.setServiceConfig(service);
         configuration.getRegistryConfig().getRegistry().register(service);
         // 维护该接口
-        SERVICE_MAP.put(service.getInterface().getName(), service);
+        SERVICE_MAP.put(service.getPath(), service);
     }
 
     /**

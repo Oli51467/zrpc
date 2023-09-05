@@ -24,18 +24,18 @@ import java.util.concurrent.TimeoutException;
 public class RpcClientInvocationHandler implements InvocationHandler {
 
     private final String appName;
-    private final Class<?> targetInterface;
+    private final String path;
 
-    public RpcClientInvocationHandler(String appName, Class<?> targetInterface) {
+    public RpcClientInvocationHandler(String appName, String path) {
         this.appName = appName;
-        this.targetInterface = targetInterface;
+        this.path = path;
     }
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         // 1.封装报文
         RequestPayload requestPayload = RequestPayload.builder()
-                .interfaceName(targetInterface.getName())
+                .path(path)
                 .methodName(method.getName())
                 .parametersType(method.getParameterTypes())
                 .parametersValue(args)
@@ -54,8 +54,8 @@ public class RpcClientInvocationHandler implements InvocationHandler {
         RpcRequestHolder.set(request);
 
         // 3.寻找该服务的可用节点，通过客户端负载均衡寻找一个可用的服务
-        InetSocketAddress address = IRpcBootstrap.getInstance().getLoadBalancer().selectService(appName, targetInterface.getName());
-        log.info("发现服务【{}】的提供者: {}", targetInterface.getName(), address);
+        InetSocketAddress address = IRpcBootstrap.getInstance().getLoadBalancer().selectService(appName, path);
+        log.info("发现服务【{}】的提供者: {}", path, address);
         Channel channel = getChannel(address);
         // 4.异步发送报文 并将该任务挂起
         CompletableFuture<Object> completableFuture = new CompletableFuture<>();

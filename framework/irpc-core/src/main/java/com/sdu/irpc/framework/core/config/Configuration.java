@@ -1,7 +1,6 @@
 package com.sdu.irpc.framework.core.config;
 
 import com.sdu.irpc.framework.common.constant.DefaultBoostrapConfig;
-import com.sdu.irpc.framework.common.entity.rpc.ServiceConfig;
 import com.sdu.irpc.framework.common.enums.CompressionType;
 import com.sdu.irpc.framework.common.enums.LoadBalancerType;
 import com.sdu.irpc.framework.common.enums.SerializationType;
@@ -24,6 +23,4 @@ public class Configuration implements DefaultBoostrapConfig {
     private IdGenerator idGenerator = new IdGenerator();
 
     private LoadBalancerType loadBalancer = LoadBalancerType.ROUND_ROBIN;
-
-    private ServiceConfig serviceConfig;
 }

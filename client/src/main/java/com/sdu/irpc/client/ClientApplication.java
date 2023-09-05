@@ -10,10 +10,11 @@ import lombok.extern.slf4j.Slf4j;
 public class ClientApplication {
 
     public static void main(String[] args) {
-        // 获取代理对象，使用ReferenceConfig进行封
+        // 获取代理对象，使用ReferenceConfig进行封装
         ReferenceConfig<Greet> reference = new ReferenceConfig<>();
         reference.setTargetInterface(Greet.class);
         reference.setAppName("p1");
+        reference.setPath("greet.echo");
         Greet proxy = reference.get();
         IRpcBootstrap.getInstance()
                 .serialize(SerializationType.HESSIAN);

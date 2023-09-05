@@ -19,7 +19,7 @@ public class RequestPayload implements Serializable {
     /**
      * 接口名
      */
-    private String interfaceName;
+    private String path;
 
     /**
      * 方法名

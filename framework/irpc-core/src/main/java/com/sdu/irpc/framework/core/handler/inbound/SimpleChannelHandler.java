@@ -42,7 +42,7 @@ public class SimpleChannelHandler extends SimpleChannelInboundHandler<RpcRespons
             IRpcBootstrap.CHANNEL_CACHE.remove((InetSocketAddress) channelHandlerContext.channel().remoteAddress());
             RpcRequest request = RpcRequestHolder.get();
             // 重新进行负载均衡
-            IRpcBootstrap.getInstance().getLoadBalancer().reload(request.getRequestPayload().getInterfaceName(),
+            IRpcBootstrap.getInstance().getLoadBalancer().reload(request.getRequestPayload().getPath(),
                     IRpcBootstrap.CHANNEL_CACHE.keySet().stream().toList());
             throw new ResponseException(code,RespCode.CLOSING.getDesc());
         }

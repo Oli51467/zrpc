@@ -1,10 +1,12 @@
 package com.sdu.irpc.framework.common.util;
 
+import com.sdu.irpc.framework.common.annotation.IrpcMapping;
 import com.sdu.irpc.framework.common.annotation.IrpcService;
 import com.sdu.irpc.framework.common.entity.rpc.ServiceConfig;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +14,8 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class FileUtil {
+
+    String regex = "^[a-zA-Z0-9]+(/[^/]*)*$";
 
     public static List<String> getAllClassNames(String packageName) {
         String basePath = packageName.replaceAll("\\.", "/");
@@ -69,23 +73,34 @@ public class FileUtil {
         List<ServiceConfig> serviceConfigList = new ArrayList<>();
         for (Class<?> clazz : classes) {
             // 获取接口
-            Class<?>[] interfaces = clazz.getInterfaces();
+            IrpcService serviceAnnotation = clazz.getAnnotation(IrpcService.class);
+            String parentPath = serviceAnnotation.path();
+            String applicationName = serviceAnnotation.application();
             Object instance;
             try {
                 instance = clazz.getConstructor().newInstance();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-            IrpcService annotation = clazz.getAnnotation(IrpcService.class);
-            String applicationName = annotation.application();
-
-            for (Class<?> i : interfaces) {
-                ServiceConfig serviceConfig = new ServiceConfig();
-                serviceConfig.setInterface(i);
-                serviceConfig.setReference(instance);
-                serviceConfig.setApplicationName(applicationName);
-                log.info("---->已经通过包扫描，将服务【{}】发布.", i);
-                serviceConfigList.add(serviceConfig);
+            Method[] methods = clazz.getMethods();
+            for (Method method : methods) {
+                if (method.getAnnotation(IrpcMapping.class) != null) {
+                    IrpcMapping mappingAnnotation = method.getAnnotation(IrpcMapping.class);
+                    String path = parentPath + mappingAnnotation.path();
+                    path = path.replace("/", ".");
+                    if (path.startsWith(".")) {
+                        path = path.substring(1);
+                    }
+                    if (path.endsWith(".")) {
+                        path = path.substring(0, path.length() - 1);
+                    }
+                    ServiceConfig serviceConfig = new ServiceConfig();
+                    serviceConfig.setPath(path);
+                    serviceConfig.setReference(instance);
+                    serviceConfig.setMethod(method);
+                    serviceConfig.setApplicationName(applicationName);
+                    serviceConfigList.add(serviceConfig);
+                }
             }
         }
         return serviceConfigList;

@@ -24,10 +24,10 @@ public class UpAndDownWatcher implements Watcher {
             log.info("检测到服务【{}】下有节点变化", event.getPath());
             Thread.sleep(500);
             String[] pathArgs = event.getPath().split("/");
-            String serviceName = pathArgs[pathArgs.length - 1];
+            String pathName = pathArgs[pathArgs.length - 1];
             String appName = pathArgs[pathArgs.length - 2];
             Registry registry = IRpcBootstrap.getInstance().getRegistry();
-            List<InetSocketAddress> addressList = registry.discover(appName, serviceName);
+            List<InetSocketAddress> addressList = registry.discover(appName, pathName);
             // 处理新增的节点
             for (InetSocketAddress address : addressList) {
                 if (!IRpcBootstrap.CHANNEL_CACHE.containsKey(address)) {
@@ -47,7 +47,7 @@ public class UpAndDownWatcher implements Watcher {
                 }
             }
             // 重新负载均衡
-            IRpcBootstrap.getInstance().getLoadBalancer().reload(serviceName, addressList);
+            IRpcBootstrap.getInstance().getLoadBalancer().reload(pathName, addressList);
         }
     }
 }

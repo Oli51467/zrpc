@@ -13,15 +13,16 @@ import java.lang.reflect.Proxy;
 public class ReferenceConfig<T> {
 
     private Class<T> targetInterface;
+    private String path;
     private String appName;
 
     public T get() {
         // 开启心跳探活
-        HeartbeatDetector heartbeatDetector = new HeartbeatDetector(appName, targetInterface.getName());
+        HeartbeatDetector heartbeatDetector = new HeartbeatDetector(appName, path);
         heartbeatDetector.startDetect();
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        Class<T>[] classes = new Class[]{targetInterface};
-        InvocationHandler handler = new RpcClientInvocationHandler(appName, targetInterface);
+        Class<?>[] classes = new Class[]{targetInterface};
+        InvocationHandler handler = new RpcClientInvocationHandler(appName, path);
 
         Object helloProxy = Proxy.newProxyInstance(classLoader, classes, handler);
         return (T) helloProxy;

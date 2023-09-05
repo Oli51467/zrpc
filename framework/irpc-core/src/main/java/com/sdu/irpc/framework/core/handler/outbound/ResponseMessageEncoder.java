@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
  * |                                                   body
  * |
  * +-----------------------------------------------------------------------------------------------------------------------------------------------------
- * 4B magic(魔数)   ---> Irpc.getBytes()
+ * 4B magic(魔数)   ---> IrpcClient.getBytes()
  * 1B version(版本) ---> 1
  * 2B header length 头部的长度
  * 4B total  length 报文总长度
