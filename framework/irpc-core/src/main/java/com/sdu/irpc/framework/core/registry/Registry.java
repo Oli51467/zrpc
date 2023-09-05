@@ -1,6 +1,6 @@
 package com.sdu.irpc.framework.core.registry;
 
-import com.sdu.irpc.framework.common.entity.rpc.ServiceConfig;
+import com.sdu.irpc.framework.core.config.ServiceConfig;
 
 import java.net.InetSocketAddress;
 import java.util.List;

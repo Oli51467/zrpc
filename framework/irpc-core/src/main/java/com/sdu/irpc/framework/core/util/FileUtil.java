@@ -1,8 +1,10 @@
-package com.sdu.irpc.framework.common.util;
+package com.sdu.irpc.framework.core.util;
 
+import com.sdu.irpc.framework.common.annotation.IrpcClient;
 import com.sdu.irpc.framework.common.annotation.IrpcMapping;
 import com.sdu.irpc.framework.common.annotation.IrpcService;
-import com.sdu.irpc.framework.common.entity.rpc.ServiceConfig;
+import com.sdu.irpc.framework.core.config.ReferenceConfig;
+import com.sdu.irpc.framework.core.config.ServiceConfig;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -14,8 +16,6 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class FileUtil {
-
-    String regex = "^[a-zA-Z0-9]+(/[^/]*)*$";
 
     public static List<String> getAllClassNames(String packageName) {
         String basePath = packageName.replaceAll("\\.", "/");
@@ -57,7 +57,8 @@ public class FileUtil {
         return fullPath.substring(0, fullPath.lastIndexOf(".")).replace("/", ".");
     }
 
-    public static List<Class<?>> filterClassWithAnnotation(List<String> classNames) {
+    public static List<Class<?>> filterClassWithServiceAnnotation(List<String> classNames) {
+        String regex = "^[a-zA-Z0-9/]*$";
         return classNames.stream()
                 .map(className -> {
                     try {
@@ -65,12 +66,41 @@ public class FileUtil {
                     } catch (ClassNotFoundException e) {
                         throw new RuntimeException(e);
                     }
-                }).filter(clazz -> clazz.getAnnotation(IrpcService.class) != null)
+                }).filter(clazz -> {
+                    if (clazz.getAnnotation(IrpcService.class) != null) {
+                        String path = clazz.getAnnotation(IrpcService.class).path();
+                        if (!path.matches(regex)) {
+                            return false;
+                        }
+                        // 检查字符串的任意连续两个字符是否都不是 "/"
+                        for (int i = 0; i < path.length() - 1; i++) {
+                            if (path.charAt(i) == '/' && path.charAt(i + 1) == '/') {
+                                return false;
+                            }
+                        }
+                        return true;
+                    } else {
+                        return false;
+                    }
+                })
                 .collect(Collectors.toList());
     }
 
-    public static List<ServiceConfig> createConfigWithClasses(List<Class<?>> classes) {
+    public static List<Class<?>> filterClassWithClientAnnotation(List<String> classNames) {
+        return classNames.stream()
+                .map(className -> {
+                    try {
+                        return Class.forName(className);
+                    } catch (ClassNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+                }).filter(clazz -> clazz.getAnnotation(IrpcClient.class) != null)
+                .collect(Collectors.toList());
+    }
+
+    public static List<ServiceConfig> createServiceConfigWithClasses(List<Class<?>> classes) {
         List<ServiceConfig> serviceConfigList = new ArrayList<>();
+        String regex = "^[a-zA-Z0-9/]*$";
         for (Class<?> clazz : classes) {
             // 获取接口
             IrpcService serviceAnnotation = clazz.getAnnotation(IrpcService.class);
@@ -87,6 +117,20 @@ public class FileUtil {
                 if (method.getAnnotation(IrpcMapping.class) != null) {
                     IrpcMapping mappingAnnotation = method.getAnnotation(IrpcMapping.class);
                     String path = parentPath + mappingAnnotation.path();
+                    if (!path.matches(regex)) {
+                        continue;
+                    }
+                    // 检查字符串的任意连续两个字符是否都不是 "/"
+                    boolean ok = true;
+                    for (int i = 0; i < path.length() - 1; i++) {
+                        if (path.charAt(i) == '/' && path.charAt(i + 1) == '/') {
+                            ok = false;
+                            break;
+                        }
+                    }
+                    if (!ok) {
+                        continue;
+                    }
                     path = path.replace("/", ".");
                     if (path.startsWith(".")) {
                         path = path.substring(1);
@@ -104,5 +148,18 @@ public class FileUtil {
             }
         }
         return serviceConfigList;
+    }
+
+    public static List<ReferenceConfig<?>> createReferenceConfigWithClasses(List<Class<?>> classes) {
+        List<ReferenceConfig<?>> referenceConfigList = new ArrayList<>();
+        for (Class<?> clazz : classes) {
+            // 获取接口
+            IrpcService serviceAnnotation = clazz.getAnnotation(IrpcService.class);
+            String parentPath = serviceAnnotation.path();
+            String applicationName = serviceAnnotation.application();
+            ReferenceConfig<?> referenceConfig = new ReferenceConfig<>(clazz, parentPath, applicationName);
+            referenceConfigList.add(referenceConfig);
+        }
+        return referenceConfigList;
     }
 }

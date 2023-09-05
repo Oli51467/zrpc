@@ -1,7 +1,7 @@
 package com.sdu.irpc.framework.core.registry.impl;
 
 import com.sdu.irpc.framework.common.entity.ZooKeeperNode;
-import com.sdu.irpc.framework.common.entity.rpc.ServiceConfig;
+import com.sdu.irpc.framework.core.config.ServiceConfig;
 import com.sdu.irpc.framework.common.exception.DiscoveryException;
 import com.sdu.irpc.framework.common.util.NetUtil;
 import com.sdu.irpc.framework.common.util.ZookeeperUtil;

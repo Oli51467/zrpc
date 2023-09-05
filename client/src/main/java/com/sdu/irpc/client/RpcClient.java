@@ -3,7 +3,7 @@ package com.sdu.irpc.client;
 import com.sdu.irpc.framework.common.annotation.IrpcClient;
 import com.sdu.irpc.framework.common.annotation.IrpcMapping;
 
-@IrpcClient(application = "p1")
+@IrpcClient(application = "p1", path = "greet.hello")
 public interface RpcClient {
 
     @IrpcMapping(path = "/greet/echo")

@@ -1,10 +1,9 @@
 package com.sdu.irpc.framework.core.config;
 
-import com.sdu.irpc.framework.common.entity.rpc.ServiceConfig;
 import com.sdu.irpc.framework.common.enums.CompressionType;
 import com.sdu.irpc.framework.common.enums.LoadBalancerType;
 import com.sdu.irpc.framework.common.enums.SerializationType;
-import com.sdu.irpc.framework.common.util.FileUtil;
+import com.sdu.irpc.framework.core.util.FileUtil;
 import com.sdu.irpc.framework.common.util.IdGenerator;
 import com.sdu.irpc.framework.core.compressor.CompressorFactory;
 import com.sdu.irpc.framework.core.handler.inbound.HttpHeadersHandler;
@@ -219,11 +218,24 @@ public class IRpcBootstrap {
      * @param packageName 包名
      * @return this本身
      */
-    public IRpcBootstrap scan(String packageName) {
+    public IRpcBootstrap scanServices(String packageName) {
         // 1、需要通过packageName获取其下的所有的类的权限定名称
         List<String> classNames = FileUtil.getAllClassNames(packageName);
-        List<Class<?>> classes = FileUtil.filterClassWithAnnotation(classNames);
-        List<ServiceConfig> serviceConfigList = FileUtil.createConfigWithClasses(classes);
+        List<Class<?>> classes = FileUtil.filterClassWithServiceAnnotation(classNames);
+        List<ServiceConfig> serviceConfigList = FileUtil.createServiceConfigWithClasses(classes);
         return publish(serviceConfigList);
+    }
+
+    /**
+     * 扫描包，生成代理
+     *
+     * @param packageName 包名
+     * @return this本身
+     */
+    public List<ReferenceConfig<?>> scanClients(String packageName) {
+        // 1、需要通过packageName获取其下的所有的类的权限定名称
+        List<String> classNames = FileUtil.getAllClassNames(packageName);
+        List<Class<?>> classes = FileUtil.filterClassWithClientAnnotation(classNames);
+        return FileUtil.createReferenceConfigWithClasses(classes);
     }
 }

@@ -2,6 +2,8 @@ package com.sdu.irpc.framework.core.config;
 
 import com.sdu.irpc.framework.core.HeartbeatDetector;
 import com.sdu.irpc.framework.core.proxy.RpcClientInvocationHandler;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -10,6 +12,8 @@ import java.lang.reflect.Proxy;
 
 @Slf4j
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class ReferenceConfig<T> {
 
     private Class<T> targetInterface;

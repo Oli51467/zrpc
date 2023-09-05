@@ -1,4 +1,4 @@
-package com.sdu.irpc.framework.common.entity.rpc;
+package com.sdu.irpc.framework.core.config;
 
 import lombok.Getter;
 import lombok.Setter;

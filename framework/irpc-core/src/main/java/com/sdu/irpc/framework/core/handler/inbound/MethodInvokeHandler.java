@@ -7,7 +7,7 @@ import com.sdu.irpc.framework.common.entity.rpc.RpcResponse;
 import com.sdu.irpc.framework.common.enums.RequestType;
 import com.sdu.irpc.framework.common.enums.RespCode;
 import com.sdu.irpc.framework.core.config.IRpcBootstrap;
-import com.sdu.irpc.framework.common.entity.rpc.ServiceConfig;
+import com.sdu.irpc.framework.core.config.ServiceConfig;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;

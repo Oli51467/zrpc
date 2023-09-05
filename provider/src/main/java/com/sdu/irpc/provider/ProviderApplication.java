@@ -10,6 +10,6 @@ public class ProviderApplication {
     public static void main(String[] args) {
         IRpcBootstrap.getInstance()
                 .port(8097)
-                .scan("com.sdu.irpc").start();
+                .scanServices("com.sdu.irpc").start();
     }
 }
