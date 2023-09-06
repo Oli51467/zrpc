@@ -13,10 +13,11 @@
         <module name="provider" />
         <module name="client" />
         <module name="irpc-core" />
-        <module name="api" />
+        <module name="spring-client" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="api" target="17" />
       <module name="test" target="11" />
     </bytecodeTargetLevel>
   </component>

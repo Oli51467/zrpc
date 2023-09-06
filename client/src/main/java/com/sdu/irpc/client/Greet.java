@@ -1,4 +1,4 @@
-package com.sdu.irpc.api;
+package com.sdu.irpc.client;
 
 public interface Greet {
 

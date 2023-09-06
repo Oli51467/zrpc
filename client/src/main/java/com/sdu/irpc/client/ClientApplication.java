@@ -1,6 +1,5 @@
 package com.sdu.irpc.client;
 
-import com.sdu.irpc.api.Greet;
 import com.sdu.irpc.framework.common.enums.SerializationType;
 import com.sdu.irpc.framework.core.config.IRpcBootstrap;
 import com.sdu.irpc.framework.core.config.ReferenceConfig;

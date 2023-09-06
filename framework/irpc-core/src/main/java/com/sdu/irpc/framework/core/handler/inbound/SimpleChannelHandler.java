@@ -40,7 +40,7 @@ public class SimpleChannelHandler extends SimpleChannelInboundHandler<RpcRespons
             completableFuture.complete(null);
             log.error("当前id为[{}]的请求，访问被拒绝，目标服务器正处于关闭中，响应码[{}].", response.getRequestId(), response.getCode());
             // 将Channel从健康列表移除
-            IRpcBootstrap.CHANNEL_CACHE.remove((InetSocketAddress) channelHandlerContext.channel().remoteAddress());
+            IRpcBootstrap.CHANNEL_CACHE.remove((InetSocketAddress) socketAddress);
             RpcRequest request = RpcRequestHolder.get();
             // 重新进行负载均衡
             IRpcBootstrap.getInstance().getLoadBalancer().reload(request.getRequestPayload().getPath(), IRpcBootstrap.CHANNEL_CACHE.keySet().stream().toList());

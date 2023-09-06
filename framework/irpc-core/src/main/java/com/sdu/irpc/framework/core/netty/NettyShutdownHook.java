@@ -9,6 +9,11 @@ public class NettyShutdownHook extends Thread {
         ShutdownContextHolder.BAFFLE.set(true);
         long start = System.currentTimeMillis();
         while (true) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
             if (ShutdownContextHolder.REQUEST_COUNTER.sum() == 0L || System.currentTimeMillis() - start > 10000) {
                 break;
             }

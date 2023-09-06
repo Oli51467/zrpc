@@ -15,7 +15,8 @@
         <module>manager</module>
         <module>client</module>
         <module>provider</module>
-        <module>api</module>
+        <module>spring-client</module>
+        <module>spring-provider</module>
     </modules>
 
     <properties>
