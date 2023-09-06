@@ -131,113 +131,102 @@ public class TokenBuketRateLimiter implements RateLimiter {
 ```java
 public class CircuitBreaker {
 
-    // 理论上：标准的断路器应该有三种状态  open close half_open，我们为了简单只选取两种
-    private volatile boolean isOpen = false;
-
-    // 需要搜集指标  异常的数量   比例
-    // 总的请求数
-    private AtomicInteger requestCount = new AtomicInteger(0);
-
+    // 熔断器状态
+    public static volatile CircuitStatus status = CircuitStatus.CLOSE;
     // 异常的请求数
-    private AtomicInteger errorRequest = new AtomicInteger(0);
-
+    private final AtomicInteger errorRequestCount = new AtomicInteger(0);
+    // 记录是否在半开期，使用ThreadLocal来存储线程状态
+    private final ThreadLocal<Boolean> attemptLocal = ThreadLocal.withInitial(() -> false);
     // 异常的阈值
-    private int maxErrorRequest;
-    private float maxErrorRate;
-
-    public CircuitBreaker(int maxErrorRequest, float maxErrorRate) {
-        this.maxErrorRequest = maxErrorRequest;
-        this.maxErrorRate = maxErrorRate;
-    }
-
-
-    // 断路器的核心方法，判断是否开启
-    public boolean isBreak() {
-        // 优先返回，如果已经打开了，就直接返回true
-        if (isOpen) {
-            return true;
-        }
-
-        // 需要判断数据指标，是否满足当前的阈值
-        if (errorRequest.get() > maxErrorRequest) {
-            this.isOpen = true;
-            return true;
-        }
-
-        if (errorRequest.get() > 0 && requestCount.get() > 0 &&
-                errorRequest.get() / (float) requestCount.get() > maxErrorRate
-        ) {
-            this.isOpen = true;
-            return true;
-        }
-
-        return false;
-    }
+    private final int maxErrorCount = 3;
+    // 打开状态持续时间，单位毫秒
+    private static final long OPEN_DURATION = 50;
+    // 记录熔断器打开的实际爱你
+    private long openTime = 0;
 
     // 每次发生请求，获取发生异常应该进行记录
-    public void recordRequest() {
-        this.requestCount.getAndIncrement();
+    public void recordSuccessRequest() {
+        if (attemptLocal.get()) {
+            attemptLocal.remove();
+            reset();
+        }
     }
 
     public void recordErrorRequest() {
-        this.errorRequest.getAndIncrement();
+        // 说明当前线程进入了半打开状态的熔断器，且执行失败。重新打开熔断器
+        if (attemptLocal.get()) {
+            attemptLocal.remove();
+            status = CircuitStatus.OPEN;
+            openTime = System.currentTimeMillis();
+        } else {
+            // 普通失败，记录失败次数。判断是否需要打开
+            errorRequestCount.incrementAndGet();
+            if (status != CircuitStatus.OPEN && errorRequestCount.get() >= maxErrorCount) {
+                status = CircuitStatus.OPEN;
+                openTime = System.currentTimeMillis();
+                System.out.println("Switch to open");
+            }
+        }
     }
 
     /**
      * 重置熔断器
      */
     public void reset() {
-        this.isOpen = false;
-        this.requestCount.set(0);
-        this.errorRequest.set(0);
+        status = CircuitStatus.CLOSE;
+        errorRequestCount.set(0);
     }
 
+    public synchronized boolean attempt() {
+        if (status == CircuitStatus.CLOSE) {
+            return true;
+        }
+        if (status == CircuitStatus.HALF_OPEN) {
+            System.out.println("半打开已经有线程进入，等待。。。");
+            return false;
+        }
+        if (status == CircuitStatus.OPEN) {
+            long currentTime = System.currentTimeMillis();
+            if (currentTime - openTime >= OPEN_DURATION) {
+                status = CircuitStatus.HALF_OPEN;
+                attemptLocal.set(true);
+                System.out.println("设置为半打开状态");
+                return true;
+            } else {
+                System.out.println("熔断器未重制，请求被拒绝");
+                return false;
+            }
+        }
+        return false;
+    }
 
     public static void main(String[] args) {
-
-        CircuitBreaker circuitBreaker = new CircuitBreaker(3, 1.1F);
-
-        new Thread(() -> {
-            for (int i = 0; i < 1000; i++) {
-
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+        CircuitBreaker circuitBreaker = new CircuitBreaker();
+        for (int i = 0; i < 1000; i ++ ) {
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Random random = new Random();
+                    try {
+                        Thread.sleep(random.nextInt(500));
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    int a = random.nextInt(1000);
+                    if (circuitBreaker.attempt()) {
+                        if (a <= 100) {
+                            circuitBreaker.recordErrorRequest();
+                            System.out.println("Error");
+                        } else {
+                            circuitBreaker.recordSuccessRequest();
+                            System.out.println("Success");
+                        }
+                    } else {
+                        System.out.println("Failed");
+                    }
                 }
-
-                circuitBreaker.recordRequest();
-                int num = new Random().nextInt(100);
-                if (num > 70) {
-                    circuitBreaker.recordErrorRequest();
-                }
-
-                boolean aBreak = circuitBreaker.isBreak();
-
-                String result = aBreak ? "断路器阻塞了请求" : "断路器放行了请求";
-
-                System.out.println(result);
-
-            }
-        }).start();
-
-
-        new Thread(() -> {
-            for (; ; ) {
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                System.out.println("-----------------------------------------");
-                circuitBreaker.reset();
-            }
-        }).start();
-
-        try {
-            Thread.sleep(1000000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            });
+            thread.start();
         }
     }
 }
