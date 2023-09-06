@@ -37,7 +37,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class IRpcBootstrap {
 
+    // 配置类单例
     private static final IRpcBootstrap iRpcBootstrap = new IRpcBootstrap();
+    private final Configuration configuration;
 
     // 维护已经发布且暴露的服务列表 (k, v) -> (接口的全限定名, ServiceConfig)
     public static final Map<String, ServiceConfig> SERVICE_MAP = new ConcurrentHashMap<>(8);
@@ -47,8 +49,6 @@ public class IRpcBootstrap {
     public static final Map<Long, CompletableFuture<Object>> PENDING_REQUEST = new ConcurrentHashMap<>(64);
     // 维护每个连接的响应时间
     public static final TreeMap<Long, Channel> RESPONSE_TIME_CACHE = new TreeMap<>();
-
-    private final Configuration configuration;
 
     private IRpcBootstrap() {
         configuration = new Configuration();

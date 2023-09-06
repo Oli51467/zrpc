@@ -1,6 +1,5 @@
 package com.sdu.irpc.framework.core.config;
 
-import com.sdu.irpc.framework.core.HeartbeatDetector;
 import com.sdu.irpc.framework.core.proxy.RpcClientInvocationHandler;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -21,9 +20,6 @@ public class ReferenceConfig<T> {
     private String appName;
 
     public T get() {
-        // 开启心跳探活
-        HeartbeatDetector heartbeatDetector = new HeartbeatDetector(appName, path);
-        heartbeatDetector.startDetect();
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         Class<?>[] classes = new Class[]{targetInterface};
         InvocationHandler handler = new RpcClientInvocationHandler(appName, path);

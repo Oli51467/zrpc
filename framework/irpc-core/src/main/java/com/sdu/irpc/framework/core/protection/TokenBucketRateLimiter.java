@@ -1,4 +1,4 @@
-package com.sdu.irpc.framework.core.limiter;
+package com.sdu.irpc.framework.core.protection;
 
 public class TokenBucketRateLimiter implements Limiter {
 

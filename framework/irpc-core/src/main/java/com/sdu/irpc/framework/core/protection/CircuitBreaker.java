@@ -1,11 +1,13 @@
-package com.sdu.irpc.framework.core.limiter;
+package com.sdu.irpc.framework.core.protection;
 
 import com.sdu.irpc.framework.common.enums.CircuitStatus;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class CircuitBreaker {
+@Slf4j
+public class CircuitBreaker implements Breaker {
 
     // 熔断器状态
     public static volatile CircuitStatus status = CircuitStatus.CLOSE;
@@ -14,7 +16,7 @@ public class CircuitBreaker {
     // 记录是否在半开期，使用ThreadLocal来存储线程状态
     private final ThreadLocal<Boolean> attemptLocal = ThreadLocal.withInitial(() -> false);
     // 异常的阈值
-    private final int maxErrorCount = 3;
+    private final int maxErrorCount = 10;
     // 打开状态持续时间，单位毫秒
     private static final long OPEN_DURATION = 50;
     // 记录熔断器打开的实际爱你
@@ -34,13 +36,14 @@ public class CircuitBreaker {
             attemptLocal.remove();
             status = CircuitStatus.OPEN;
             openTime = System.currentTimeMillis();
+            log.info("重试仍失败，熔断器重新打开");
         } else {
             // 普通失败，记录失败次数。判断是否需要打开
             errorRequestCount.incrementAndGet();
             if (status != CircuitStatus.OPEN && errorRequestCount.get() >= maxErrorCount) {
                 status = CircuitStatus.OPEN;
                 openTime = System.currentTimeMillis();
-                System.out.println("Switch to open");
+                log.info("失败次数过多，熔断器打开");
             }
         }
     }
@@ -58,7 +61,7 @@ public class CircuitBreaker {
             return true;
         }
         if (status == CircuitStatus.HALF_OPEN) {
-            System.out.println("半打开已经有线程进入，等待。。。");
+            log.info("当前状态为半打开，已经有线程进入");
             return false;
         }
         if (status == CircuitStatus.OPEN) {
@@ -66,10 +69,10 @@ public class CircuitBreaker {
             if (currentTime - openTime >= OPEN_DURATION) {
                 status = CircuitStatus.HALF_OPEN;
                 attemptLocal.set(true);
-                System.out.println("设置为半打开状态");
+                log.info("设置为半打开状态");
                 return true;
             } else {
-                System.out.println("熔断器未重制，请求被拒绝");
+                log.info("请求被熔断");
                 return false;
             }
         }

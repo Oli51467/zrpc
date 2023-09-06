@@ -8,6 +8,8 @@ import com.sdu.irpc.framework.common.exception.DiscoveryException;
 import com.sdu.irpc.framework.common.exception.NetworkException;
 import com.sdu.irpc.framework.core.config.IRpcBootstrap;
 import com.sdu.irpc.framework.core.netty.NettyBoostrapInitializer;
+import com.sdu.irpc.framework.core.protection.Breaker;
+import com.sdu.irpc.framework.core.protection.CircuitBreaker;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -32,7 +36,7 @@ public class RpcClientInvocationHandler implements InvocationHandler {
     }
 
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    public Object invoke(Object proxy, Method method, Object[] args) {
         // 1.封装报文
         RequestPayload requestPayload = RequestPayload.builder()
                 .path(path)
@@ -56,19 +60,34 @@ public class RpcClientInvocationHandler implements InvocationHandler {
         // 3.寻找该服务的可用节点，通过客户端负载均衡寻找一个可用的服务
         InetSocketAddress address = IRpcBootstrap.getInstance().getLoadBalancer().selectService(appName, path);
         log.info("发现服务【{}】的提供者: {}", path, address);
-        Channel channel = getChannel(address);
-        // 4.异步发送报文 并将该任务挂起
-        CompletableFuture<Object> completableFuture = new CompletableFuture<>();
-        IRpcBootstrap.PENDING_REQUEST.put(request.getRequestId(), completableFuture);
-        channel.writeAndFlush(request).addListener((ChannelFutureListener) promise -> {
-            if (!promise.isSuccess()) {
-                log.error("远程调用失败");
-                completableFuture.completeExceptionally(promise.cause());
-            }
-        });
-        Object result = completableFuture.get(3, TimeUnit.SECONDS);
-        RpcRequestHolder.remove();
-        return result;
+        // 4.判断是否断路
+        Map<SocketAddress, Breaker> ipBreaker = IRpcBootstrap.getInstance().getConfiguration().getIpBreaker();
+        Breaker breaker = ipBreaker.get(address);
+        if (null == breaker) {
+            breaker = new CircuitBreaker();
+            ipBreaker.put(address, breaker);
+        }
+        if (!breaker.attempt()) {
+            throw new RuntimeException("断路器开启，无法发送请求");
+        }
+        try {
+            Channel channel = getChannel(address);
+            // 5.异步发送报文 并将该任务挂起
+            CompletableFuture<Object> completableFuture = new CompletableFuture<>();
+            IRpcBootstrap.PENDING_REQUEST.put(request.getRequestId(), completableFuture);
+            channel.writeAndFlush(request).addListener((ChannelFutureListener) promise -> {
+                if (!promise.isSuccess()) {
+                    completableFuture.completeExceptionally(promise.cause());
+                }
+            });
+            Object result = completableFuture.get(3, TimeUnit.SECONDS);
+            RpcRequestHolder.remove();
+            breaker.recordSuccessRequest();
+            return result;
+        } catch (Exception e) {
+            breaker.recordErrorRequest();
+            return "ERROR";
+        }
     }
 
     /**
