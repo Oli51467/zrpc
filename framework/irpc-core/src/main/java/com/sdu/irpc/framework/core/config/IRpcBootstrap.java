@@ -25,7 +25,6 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.util.concurrent.Future;
-import lombok.CustomLog;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
@@ -225,18 +224,5 @@ public class IRpcBootstrap {
         List<Class<?>> classes = FileUtil.filterClassWithServiceAnnotation(classNames);
         List<ServiceConfig> serviceConfigList = FileUtil.createServiceConfigWithClasses(classes);
         return publish(serviceConfigList);
-    }
-
-    /**
-     * 扫描包，生成代理
-     *
-     * @param packageName 包名
-     * @return this本身
-     */
-    public List<ReferenceConfig<?>> scanClients(String packageName) {
-        // 1、需要通过packageName获取其下的所有的类的权限定名称
-        List<String> classNames = FileUtil.getAllClassNames(packageName);
-        List<Class<?>> classes = FileUtil.filterClassWithClientAnnotation(classNames);
-        return FileUtil.createReferenceConfigWithClasses(classes);
     }
 }

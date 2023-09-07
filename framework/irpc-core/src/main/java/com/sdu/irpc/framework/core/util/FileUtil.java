@@ -1,6 +1,5 @@
 package com.sdu.irpc.framework.core.util;
 
-import com.sdu.irpc.framework.common.annotation.IrpcClient;
 import com.sdu.irpc.framework.common.annotation.IrpcMapping;
 import com.sdu.irpc.framework.common.annotation.IrpcService;
 import com.sdu.irpc.framework.core.config.ReferenceConfig;
@@ -13,6 +12,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.sdu.irpc.framework.common.constant.Constants.PATH_REGEX;
 
 @Slf4j
 public class FileUtil {
@@ -58,7 +59,6 @@ public class FileUtil {
     }
 
     public static List<Class<?>> filterClassWithServiceAnnotation(List<String> classNames) {
-        String regex = "^[a-zA-Z0-9/]*$";
         return classNames.stream()
                 .map(className -> {
                     try {
@@ -69,7 +69,7 @@ public class FileUtil {
                 }).filter(clazz -> {
                     if (clazz.getAnnotation(IrpcService.class) != null) {
                         String path = clazz.getAnnotation(IrpcService.class).path();
-                        if (!path.matches(regex)) {
+                        if (!path.matches(PATH_REGEX)) {
                             return false;
                         }
                         // 检查字符串的任意连续两个字符是否都不是 "/"
@@ -86,21 +86,8 @@ public class FileUtil {
                 .collect(Collectors.toList());
     }
 
-    public static List<Class<?>> filterClassWithClientAnnotation(List<String> classNames) {
-        return classNames.stream()
-                .map(className -> {
-                    try {
-                        return Class.forName(className);
-                    } catch (ClassNotFoundException e) {
-                        throw new RuntimeException(e);
-                    }
-                }).filter(clazz -> clazz.getAnnotation(IrpcClient.class) != null)
-                .collect(Collectors.toList());
-    }
-
     public static List<ServiceConfig> createServiceConfigWithClasses(List<Class<?>> classes) {
         List<ServiceConfig> serviceConfigList = new ArrayList<>();
-        String regex = "^[a-zA-Z0-9/]*$";
         for (Class<?> clazz : classes) {
             // 获取接口
             IrpcService serviceAnnotation = clazz.getAnnotation(IrpcService.class);
@@ -117,7 +104,7 @@ public class FileUtil {
                 if (method.getAnnotation(IrpcMapping.class) != null) {
                     IrpcMapping mappingAnnotation = method.getAnnotation(IrpcMapping.class);
                     String path = parentPath + mappingAnnotation.path();
-                    if (!path.matches(regex)) {
+                    if (!path.matches(PATH_REGEX)) {
                         continue;
                     }
                     // 检查字符串的任意连续两个字符是否都不是 "/"
