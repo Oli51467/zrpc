@@ -19,7 +19,7 @@ public class CircuitBreaker implements Breaker {
     private final int maxErrorCount = 10;
     // 打开状态持续时间，单位毫秒
     private static final long OPEN_DURATION = 50;
-    // 记录熔断器打开的实际爱你
+    // 记录熔断器打开的时间
     private long openTime = 0;
 
     // 每次发生请求，获取发生异常应该进行记录

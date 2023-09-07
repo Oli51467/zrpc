@@ -56,54 +56,37 @@ public class RetryPolicy {
 
 基于令牌桶的限流器：
 ```java
-public class TokenBuketRateLimiter implements RateLimiter {
-    
-    // 代表令牌的数量，>0 说明有令牌，能放行，放行就减一，==0,无令牌  阻拦
+@Slf4j
+public class TokenBucketRateLimiter implements Limiter {
+
     private int tokens;
-    
-    // 限流的本质就是，令牌数
+
     private final int capacity;
-    
-    private final int rate;
-    
-    // 上一次放令牌的时间
+
+    private final int interval;
+
     private Long lastTokenTime;
-    
-    public TokenBuketRateLimiter(int capacity, int rate) {
+
+    public TokenBucketRateLimiter(int capacity, int interval) {
         this.capacity = capacity;
-        this.rate = rate;
-        lastTokenTime = System.currentTimeMillis();
-        tokens = capacity;
+        this.interval = interval;
+        this.lastTokenTime = System.currentTimeMillis();
+        this.tokens = capacity;
     }
-    
-    /**
-     * 判断请求是否可以放行
-     * @return true 放行  false  拦截
-     */
+
+    @Override
     public synchronized boolean allowRequest() {
-        // 1、给令牌桶添加令牌
-        // 计算从现在到上一次的时间间隔需要添加的令牌数
         Long currentTime = System.currentTimeMillis();
         long timeInterval = currentTime - lastTokenTime;
-        // 如果间隔时间超过一秒，放令牌
-        if(timeInterval >= 1000/rate){
-            int needAddTokens = (int)(timeInterval * rate / 1000);
-            System.out.println("needAddTokens = " + needAddTokens);
-            // 给令牌桶添加令牌
-            tokens = Math.min(capacity, tokens + needAddTokens);
-            System.out.println("tokens = " + tokens);
-    
-            // 标记最后一个放入令牌的时间
+        if (timeInterval > interval) {
+            tokens = (int) Math.min(capacity, timeInterval * 10 + tokens);
             this.lastTokenTime = System.currentTimeMillis();
         }
-        
-        // 2、自己获取令牌,如果令牌桶中有令牌则放行，否则拦截
-        if(tokens > 0){
-            tokens --;
-            System.out.println("请求被放行---------------");
+        if (tokens > 0) {
+            tokens--;
             return true;
         } else {
-            System.out.println("请求被拦截---------------");
+            log.info("请求被拦截---------------");
             return false;
         }
     }
@@ -129,7 +112,8 @@ public class TokenBuketRateLimiter implements RateLimiter {
 
 代码如下：
 ```java
-public class CircuitBreaker {
+@Slf4j
+public class CircuitBreaker implements Breaker {
 
     // 熔断器状态
     public static volatile CircuitStatus status = CircuitStatus.CLOSE;
@@ -138,10 +122,10 @@ public class CircuitBreaker {
     // 记录是否在半开期，使用ThreadLocal来存储线程状态
     private final ThreadLocal<Boolean> attemptLocal = ThreadLocal.withInitial(() -> false);
     // 异常的阈值
-    private final int maxErrorCount = 3;
+    private final int maxErrorCount = 10;
     // 打开状态持续时间，单位毫秒
     private static final long OPEN_DURATION = 50;
-    // 记录熔断器打开的实际爱你
+    // 记录熔断器打开的时间
     private long openTime = 0;
 
     // 每次发生请求，获取发生异常应该进行记录
@@ -158,13 +142,14 @@ public class CircuitBreaker {
             attemptLocal.remove();
             status = CircuitStatus.OPEN;
             openTime = System.currentTimeMillis();
+            log.info("重试仍失败，熔断器重新打开");
         } else {
             // 普通失败，记录失败次数。判断是否需要打开
             errorRequestCount.incrementAndGet();
             if (status != CircuitStatus.OPEN && errorRequestCount.get() >= maxErrorCount) {
                 status = CircuitStatus.OPEN;
                 openTime = System.currentTimeMillis();
-                System.out.println("Switch to open");
+                log.info("失败次数过多，熔断器打开");
             }
         }
     }
@@ -182,7 +167,7 @@ public class CircuitBreaker {
             return true;
         }
         if (status == CircuitStatus.HALF_OPEN) {
-            System.out.println("半打开已经有线程进入，等待。。。");
+            log.info("当前状态为半打开，已经有线程进入");
             return false;
         }
         if (status == CircuitStatus.OPEN) {
@@ -190,10 +175,10 @@ public class CircuitBreaker {
             if (currentTime - openTime >= OPEN_DURATION) {
                 status = CircuitStatus.HALF_OPEN;
                 attemptLocal.set(true);
-                System.out.println("设置为半打开状态");
+                log.info("设置为半打开状态");
                 return true;
             } else {
-                System.out.println("熔断器未重制，请求被拒绝");
+                log.info("请求被熔断");
                 return false;
             }
         }

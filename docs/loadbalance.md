@@ -3,19 +3,21 @@
 为了支持多种负载均衡策略，抽象出了负载均衡器的抽象概念，形成一个接口Loadbalancer
 ```java
 public interface LoadBalancer {
-    
+
     /**
      * 根据服务名获取一个可用的服务
-     * @param serviceName 服务名称
+     *
+     * @param path 服务路径
      * @return 服务地址
      */
-    InetSocketAddress selectServiceAddress(String serviceName,String group);
-    
+    InetSocketAddress selectService(String appName, String path);
+
     /**
      * 当感知节点发生了动态上下线，我们需要重新进行负载均衡
-     * @param serviceName 服务的名称
+     *
+     * @param path 服务路径
      */
-    void reload(String serviceName, List<InetSocketAddress> addresses);
+    void reload(String path, List<InetSocketAddress> addresses);
 }
 ```
 
@@ -23,46 +25,32 @@ public interface LoadBalancer {
 ```java
 public abstract class AbstractLoadBalancer implements LoadBalancer {
 
-    // 一个服务会匹配一个selector
-    private Map<String, Selector> cache = new ConcurrentHashMap<>(8);
+    // 一个服务路径会匹配一个selector
+    private Map<String, Selector> selectorCache = new ConcurrentHashMap<>(8);
 
-    // 骨架逻辑
     @Override
-    public InetSocketAddress selectServiceAddress(String serviceName,String group) {
-
-        // 1、优先从cache中获取一个选择器
-        Selector selector = cache.get(serviceName);
-
-        // 2、如果没有，就需要为这个service创建一个selector
-        if (selector == null) {
-            // 对于这个负载均衡器，内部应该维护服务列表作为缓存
-            List<InetSocketAddress> serviceList = YrpcBootstrap.getInstance()
-                .getConfiguration().getRegistryConfig().getRegistry().lookup(serviceName,group);
-
-            // 提供一些算法负责选取合适的节点
-            selector = getSelector(serviceList);
-
+    public InetSocketAddress selectService(String appName, String path) {
+        // 优先从cache中获取一个选择器
+        Selector selector = selectorCache.get(path);
+        // 如果没有，就需要为这个service创建一个selector
+        if (null == selector) {
+            // 注册中心服务发现所有可用的节点
+            List<InetSocketAddress> serviceList = IRpcBootstrap.getInstance().getRegistry().discover(appName, path);
+            // 具体的选择逻辑由子类实现
+            selector = initSelector(serviceList);
             // 将select放入缓存当中
-            cache.put(serviceName, selector);
+            selectorCache.put(path, selector);
         }
-
-        // 获取可用节点
-        return selector.getNext();
+        // 执行selector的选择逻辑选择一个节点
+        return selector.select();
     }
 
     @Override
-    public synchronized void reload(String serviceName,List<InetSocketAddress> addresses) {
-        // 我们可以根据新的服务列表生成新的selector
-        cache.put(serviceName,getSelector(addresses));
+    public synchronized void reload(String path, List<InetSocketAddress> serviceList) {
+        selectorCache.put(path, initSelector(serviceList));
     }
 
-    /**
-     * 由子类进行扩展
-     * @param serviceList 服务列表
-     * @return 负载均衡算法选择器
-     */
-    protected abstract Selector getSelector(List<InetSocketAddress> serviceList);
-    
+    protected abstract Selector initSelector(List<InetSocketAddress> serviceList);
 }
 ```
 

@@ -26,7 +26,7 @@ public class Configuration implements DefaultBoostrapConfig {
 
     private RegistryConfig registryConfig = new RegistryConfig(DEFAULT_REGISTRY_CONFIG);
 
-    private IdGenerator idGenerator = new IdGenerator();
+    private IdGenerator idGenerator = new IdGenerator(1, 2);
 
     private LoadBalancerType loadBalancer = LoadBalancerType.ROUND_ROBIN;
 

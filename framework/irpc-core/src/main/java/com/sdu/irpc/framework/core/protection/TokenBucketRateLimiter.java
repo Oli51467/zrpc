@@ -1,5 +1,8 @@
 package com.sdu.irpc.framework.core.protection;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class TokenBucketRateLimiter implements Limiter {
 
     private int tokens;
@@ -26,10 +29,10 @@ public class TokenBucketRateLimiter implements Limiter {
             this.lastTokenTime = System.currentTimeMillis();
         }
         if (tokens > 0) {
-            tokens --;
+            tokens--;
             return true;
         } else {
-            System.out.println("请求被拦截---------------");
+            log.info("请求被拦截---------------");
             return false;
         }
     }
