@@ -9,7 +9,8 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
 
-import static com.sdu.irpc.framework.common.constant.Constants.PATH_REGEX;
+import static com.sdu.irpc.framework.core.util.FileUtil.checkPath;
+import static com.sdu.irpc.framework.core.util.FileUtil.processPath;
 
 @Component
 public class ProxyBeanPostProcessor implements BeanPostProcessor {
@@ -47,39 +48,5 @@ public class ProxyBeanPostProcessor implements BeanPostProcessor {
             }
         }
         return bean;
-    }
-
-    /**
-     * 检查路径是否合法 只能包含字母、数字和"/"
-     * @param path 路径
-     * @return 合法 true 非法 false
-     */
-    protected boolean checkPath(String path) {
-        if (!path.matches(PATH_REGEX)) {
-            return false;
-        }
-        // 检查字符串的任意连续两个字符是否都不是 "/"
-        for (int i = 0; i < path.length() - 1; i++) {
-            if (path.charAt(i) == '/' && path.charAt(i + 1) == '/') {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * 处理路径 将/换成.，将前导.和后缀.去除
-     * @param path 路径
-     * @return 处理后的路径
-     */
-    protected String processPath(String path) {
-        path = path.replace("/", ".");
-        if (path.startsWith(".")) {
-            path = path.substring(1);
-        }
-        if (path.endsWith(".")) {
-            path = path.substring(0, path.length() - 1);
-        }
-        return path;
     }
 }

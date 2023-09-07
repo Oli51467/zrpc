@@ -2,7 +2,6 @@ package com.sdu.irpc.framework.core.util;
 
 import com.sdu.irpc.framework.common.annotation.IrpcMapping;
 import com.sdu.irpc.framework.common.annotation.IrpcService;
-import com.sdu.irpc.framework.core.config.ReferenceConfig;
 import com.sdu.irpc.framework.core.config.ServiceConfig;
 import lombok.extern.slf4j.Slf4j;
 
@@ -69,16 +68,7 @@ public class FileUtil {
                 }).filter(clazz -> {
                     if (clazz.getAnnotation(IrpcService.class) != null) {
                         String path = clazz.getAnnotation(IrpcService.class).path();
-                        if (!path.matches(PATH_REGEX)) {
-                            return false;
-                        }
-                        // 检查字符串的任意连续两个字符是否都不是 "/"
-                        for (int i = 0; i < path.length() - 1; i++) {
-                            if (path.charAt(i) == '/' && path.charAt(i + 1) == '/') {
-                                return false;
-                            }
-                        }
-                        return true;
+                        return checkPath(path);
                     } else {
                         return false;
                     }
@@ -104,27 +94,10 @@ public class FileUtil {
                 if (method.getAnnotation(IrpcMapping.class) != null) {
                     IrpcMapping mappingAnnotation = method.getAnnotation(IrpcMapping.class);
                     String path = parentPath + mappingAnnotation.path();
-                    if (!path.matches(PATH_REGEX)) {
+                    if (!checkPath(path)) {
                         continue;
                     }
-                    // 检查字符串的任意连续两个字符是否都不是 "/"
-                    boolean ok = true;
-                    for (int i = 0; i < path.length() - 1; i++) {
-                        if (path.charAt(i) == '/' && path.charAt(i + 1) == '/') {
-                            ok = false;
-                            break;
-                        }
-                    }
-                    if (!ok) {
-                        continue;
-                    }
-                    path = path.replace("/", ".");
-                    if (path.startsWith(".")) {
-                        path = path.substring(1);
-                    }
-                    if (path.endsWith(".")) {
-                        path = path.substring(0, path.length() - 1);
-                    }
+                    path = processPath(path);
                     ServiceConfig serviceConfig = new ServiceConfig();
                     serviceConfig.setPath(path);
                     serviceConfig.setReference(instance);
@@ -137,16 +110,37 @@ public class FileUtil {
         return serviceConfigList;
     }
 
-    public static List<ReferenceConfig<?>> createReferenceConfigWithClasses(List<Class<?>> classes) {
-        List<ReferenceConfig<?>> referenceConfigList = new ArrayList<>();
-        for (Class<?> clazz : classes) {
-            // 获取接口
-            IrpcService serviceAnnotation = clazz.getAnnotation(IrpcService.class);
-            String parentPath = serviceAnnotation.path();
-            String applicationName = serviceAnnotation.application();
-            ReferenceConfig<?> referenceConfig = new ReferenceConfig<>(clazz, parentPath, applicationName);
-            referenceConfigList.add(referenceConfig);
+    /**
+     * 检查路径是否合法 只能包含字母、数字和"/"
+     * @param path 路径
+     * @return 合法 true 非法 false
+     */
+    public static boolean checkPath(String path) {
+        if (!path.matches(PATH_REGEX)) {
+            return false;
         }
-        return referenceConfigList;
+        // 检查字符串的任意连续两个字符是否都不是 "/"
+        for (int i = 0; i < path.length() - 1; i++) {
+            if (path.charAt(i) == '/' && path.charAt(i + 1) == '/') {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 处理路径 将/换成.，将前导.和后缀.去除
+     * @param path 路径
+     * @return 处理后的路径
+     */
+    public static String processPath(String path) {
+        path = path.replace("/", ".");
+        if (path.startsWith(".")) {
+            path = path.substring(1);
+        }
+        if (path.endsWith(".")) {
+            path = path.substring(0, path.length() - 1);
+        }
+        return path;
     }
 }

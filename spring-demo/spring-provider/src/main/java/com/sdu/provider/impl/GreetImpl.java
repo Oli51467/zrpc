@@ -10,4 +10,10 @@ public class GreetImpl {
     public String greet(String message) {
         return "Server echo greeting!";
     }
+
+    @IrpcMapping(path = "/cal")
+    public String greet1(int a, int b) {
+        int c = a + b;
+        return "Result: " + c;
+    }
 }
