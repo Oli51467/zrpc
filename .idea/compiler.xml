@@ -13,12 +13,19 @@
         <module name="provider" />
         <module name="client" />
         <module name="irpc-core" />
+        <module name="spring-provider" />
         <module name="spring-client" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="api" target="17" />
+      <module name="spring-p" target="17" />
       <module name="test" target="11" />
     </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="spring-demo" options="" />
+    </option>
   </component>
 </project>

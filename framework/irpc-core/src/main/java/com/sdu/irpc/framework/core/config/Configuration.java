@@ -33,4 +33,8 @@ public class Configuration implements DefaultBoostrapConfig {
     // 为每一个ip配置一个限流器和熔断器
     private final Map<SocketAddress, Limiter> ipRateLimiter = new ConcurrentHashMap<>(16);
     private final Map<SocketAddress, Breaker> ipBreaker = new ConcurrentHashMap<>(16);
+
+    public void setPort(Integer port) {
+        this.port = port + 10000;
+    }
 }

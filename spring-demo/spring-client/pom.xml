@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.sdu</groupId>
-        <artifactId>iRpc</artifactId>
-        <version>1.0.0</version>
+        <artifactId>spring-demo</artifactId>
+        <version>1.0</version>
     </parent>
 
     <artifactId>spring-client</artifactId>
@@ -22,7 +22,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>3.1.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
 
         <dependency>
