@@ -3,7 +3,6 @@ package com.sdu.irpc.framework.core.protection;
 import com.sdu.irpc.framework.common.enums.CircuitStatus;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
@@ -56,56 +55,23 @@ public class CircuitBreaker implements Breaker {
         errorRequestCount.set(0);
     }
 
-    public synchronized boolean attempt() {
+    public synchronized void attempt() {
         if (status == CircuitStatus.CLOSE) {
-            return true;
+            return;
         }
         if (status == CircuitStatus.HALF_OPEN) {
-            log.info("当前状态为半打开，已经有线程进入");
-            return false;
+            throw new RuntimeException("断路器开启，无法发送请求");
         }
         if (status == CircuitStatus.OPEN) {
             long currentTime = System.currentTimeMillis();
             if (currentTime - openTime >= OPEN_DURATION) {
                 status = CircuitStatus.HALF_OPEN;
                 attemptLocal.set(true);
-                log.info("设置为半打开状态");
-                return true;
+                log.info("熔断器设置为半打开状态");
             } else {
                 log.info("请求被熔断");
-                return false;
+                throw new RuntimeException("断路器开启，无法发送请求");
             }
-        }
-        return false;
-    }
-
-    public static void main(String[] args) {
-        CircuitBreaker circuitBreaker = new CircuitBreaker();
-        for (int i = 0; i < 1000; i ++ ) {
-            Thread thread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    Random random = new Random();
-                    try {
-                        Thread.sleep(random.nextInt(500));
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                    int a = random.nextInt(1000);
-                    if (circuitBreaker.attempt()) {
-                        if (a <= 100) {
-                            circuitBreaker.recordErrorRequest();
-                            System.out.println("Error");
-                        } else {
-                            circuitBreaker.recordSuccessRequest();
-                            System.out.println("Success");
-                        }
-                    } else {
-                        System.out.println("Failed");
-                    }
-                }
-            });
-            thread.start();
         }
     }
 }

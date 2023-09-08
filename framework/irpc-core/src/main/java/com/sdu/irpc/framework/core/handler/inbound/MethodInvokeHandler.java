@@ -5,6 +5,7 @@ import com.sdu.irpc.framework.common.entity.rpc.RequestPayload;
 import com.sdu.irpc.framework.common.entity.rpc.RpcRequest;
 import com.sdu.irpc.framework.common.entity.rpc.RpcResponse;
 import com.sdu.irpc.framework.common.enums.RespCode;
+import com.sdu.irpc.framework.common.exception.MethodExecutionException;
 import com.sdu.irpc.framework.core.config.IRpcBootstrap;
 import com.sdu.irpc.framework.core.config.ServiceConfig;
 import com.sdu.irpc.framework.core.protection.Limiter;
@@ -58,7 +59,7 @@ public class MethodInvokeHandler extends SimpleChannelInboundHandler<RpcRequest>
                 log.info("请求【{}】已经在服务端完成方法调用。", request.getRequestId());
                 response.setCode(RespCode.SUCCESS.getCode());
                 response.setBody(result);
-                log.info("服务提供方响应体: {}", response);
+                log.info("服务提供方响应体: {}", response.getBody());
             } catch (Exception e) {
                 log.error("Id为【{}】的请求在调用过程中发生异常。", response.getRequestId(), e);
                 response.setCode(RespCode.FAIL.getCode());
@@ -66,7 +67,10 @@ public class MethodInvokeHandler extends SimpleChannelInboundHandler<RpcRequest>
         }
         // 设置响应时间戳 写回响应
         response.setTimeStamp(System.currentTimeMillis());
-        channel.writeAndFlush(response);
+        if (channel.isActive() && channel.isOpen()) {
+            // TODO:一定要保证发送成功
+            channel.writeAndFlush(response);
+        }
         ShutdownContextHolder.REQUEST_COUNTER.decrement();
     }
 
@@ -77,6 +81,9 @@ public class MethodInvokeHandler extends SimpleChannelInboundHandler<RpcRequest>
 
         // 寻找服务的具体实现
         ServiceConfig serviceConfig = IRpcBootstrap.SERVICE_MAP.get(path);
+        if (null == serviceConfig) {
+            throw new MethodExecutionException("调用方服务路径不存在");
+        }
         Object referenceImpl = serviceConfig.getReference();
         Method method = serviceConfig.getMethod();
         // 获取方法对象 通过反射调用invoke方法

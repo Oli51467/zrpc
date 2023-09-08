@@ -8,5 +8,5 @@ public interface Breaker {
 
     void reset();
 
-    boolean attempt();
+    void attempt();
 }
