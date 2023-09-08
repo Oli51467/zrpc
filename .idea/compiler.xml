@@ -15,6 +15,7 @@
         <module name="irpc-core" />
         <module name="spring-provider" />
         <module name="spring-client" />
+        <module name="transaction" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>

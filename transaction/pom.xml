@@ -5,11 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.sdu</groupId>
-        <artifactId>spring-demo</artifactId>
-        <version>1.0</version>
+        <artifactId>iRpc</artifactId>
+        <version>1.0.0</version>
     </parent>
 
-    <artifactId>spring-client</artifactId>
+    <artifactId>transaction</artifactId>
+    <name>irpc-transaction</name>
+    <version>1.0</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -18,24 +20,26 @@
     </properties>
 
     <dependencies>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <!-- mybatis -->
         <dependency>
-            <groupId>com.sdu</groupId>
-            <artifactId>irpc-core</artifactId>
-            <version>1.0</version>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
