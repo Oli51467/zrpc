@@ -39,12 +39,6 @@
             <version>1.0</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.sdu</groupId>
-            <artifactId>transaction</artifactId>
-            <version>1.0</version>
-        </dependency>
-
         <!--Netty-->
         <dependency>
             <groupId>io.netty</groupId>

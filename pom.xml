@@ -18,7 +18,6 @@
         <module>spring-demo</module>
         <module>spring-demo/spring-client</module>
         <module>spring-demo/spring-provider</module>
-        <module>transaction</module>
     </modules>
 
     <properties>

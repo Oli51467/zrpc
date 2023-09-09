@@ -68,7 +68,6 @@ public class MethodInvokeHandler extends SimpleChannelInboundHandler<RpcRequest>
         // 设置响应时间戳 写回响应
         response.setTimeStamp(System.currentTimeMillis());
         if (channel.isActive() && channel.isOpen()) {
-            // TODO:一定要保证发送成功
             channel.writeAndFlush(response);
         }
         ShutdownContextHolder.REQUEST_COUNTER.decrement();
