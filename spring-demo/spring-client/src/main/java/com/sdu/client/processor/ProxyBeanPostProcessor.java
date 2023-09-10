@@ -5,6 +5,7 @@ import com.sdu.irpc.framework.common.annotation.IrpcProxy;
 import com.sdu.irpc.framework.core.proxy.ProxyFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
@@ -12,10 +13,11 @@ import java.lang.reflect.Field;
 import static com.sdu.irpc.framework.core.util.FileUtil.checkPath;
 
 @Component
+@Order(1)
 public class ProxyBeanPostProcessor implements BeanPostProcessor {
 
     @Override
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
         // 给带有特殊注解的bean生成一个Irpc代理对象
         Field[] declaredFields = bean.getClass().getDeclaredFields();
         for (Field field : declaredFields) {
@@ -44,6 +46,11 @@ public class ProxyBeanPostProcessor implements BeanPostProcessor {
                 }
             }
         }
+        return bean;
+    }
+
+    @Override
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         return bean;
     }
 }

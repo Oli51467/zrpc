@@ -3,7 +3,6 @@ package com.sdu.irpc.framework.common.util;
 import com.sdu.irpc.framework.common.exception.NetworkException;
 import lombok.extern.slf4j.Slf4j;
 
-import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;

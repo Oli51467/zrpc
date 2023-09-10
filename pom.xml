@@ -41,7 +41,9 @@
         <hession.version>4.0.66</hession.version>
         <mysql.version>8.0.32</mysql.version>
         <spring.version>3.0.0</spring.version>
-        <mybatis-plus.version>3.5.2</mybatis-plus.version>
+        <redis.version>3.0.0</redis.version>
+        <redission.version>3.21.0</redission.version>
+        <hutool.version>5.8.10</hutool.version>
     </properties>
 
     <dependencyManagement>
@@ -135,11 +137,25 @@
                 <version>${spring.version}</version>
             </dependency>
 
-            <!-- mybatis -->
+            <!-- redis -->
             <dependency>
-                <groupId>com.baomidou</groupId>
-                <artifactId>mybatis-plus-boot-starter</artifactId>
-                <version>${mybatis-plus.version}</version>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-redis</artifactId>
+                <version>${redis.version}</version>
+            </dependency>
+
+            <!--redisson-->
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson-spring-boot-starter</artifactId>
+                <version>${redission.version}</version>
+            </dependency>
+
+            <!-- hutool -->
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-all</artifactId>
+                <version>${hutool.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
