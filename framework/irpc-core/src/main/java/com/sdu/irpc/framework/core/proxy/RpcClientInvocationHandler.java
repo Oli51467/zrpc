@@ -1,10 +1,12 @@
 package com.sdu.irpc.framework.core.proxy;
 
+import com.sdu.irpc.framework.common.annotation.IrpcMapping;
 import com.sdu.irpc.framework.common.entity.rpc.RequestPayload;
 import com.sdu.irpc.framework.common.entity.rpc.RpcRequest;
 import com.sdu.irpc.framework.common.entity.rpc.RpcRequestHolder;
 import com.sdu.irpc.framework.common.enums.RequestType;
 import com.sdu.irpc.framework.common.exception.DiscoveryException;
+import com.sdu.irpc.framework.common.exception.InvalidRpcMappingException;
 import com.sdu.irpc.framework.common.exception.MethodExecutionException;
 import com.sdu.irpc.framework.common.exception.NetworkException;
 import com.sdu.irpc.framework.core.config.IRpcBootstrap;
@@ -25,6 +27,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import static com.sdu.irpc.framework.core.util.FileUtil.checkPath;
+import static com.sdu.irpc.framework.core.util.FileUtil.processPath;
+
 @Slf4j
 public class RpcClientInvocationHandler implements InvocationHandler {
 
@@ -38,9 +43,23 @@ public class RpcClientInvocationHandler implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) {
+        IrpcMapping mappingAnnotation = method.getAnnotation(IrpcMapping.class);
+        if (null == mappingAnnotation) {
+            log.error("远程调用缺少Path字段或缺少映射注解, method: {}", method.getName());
+            throw new InvalidRpcMappingException();
+        }
+        String childPath = mappingAnnotation.path();
+        String tempPath = new String(path);
+        tempPath = tempPath.concat(childPath);
+        if (!checkPath(tempPath)) {
+            log.error("远程调用Path字段非法, path: {}", tempPath);
+            throw new InvalidRpcMappingException();
+        }
+        // 对路径的特殊字符做处理
+        tempPath = processPath(tempPath);
         // 1.寻找该服务的可用节点，通过客户端负载均衡寻找一个可用的服务。如果找不到会抛出一个异常
-        InetSocketAddress address = IRpcBootstrap.getInstance().getLoadBalancer().selectService(appName, path);
-        log.info("发现服务【{}】的提供者: {}", path, address);
+        InetSocketAddress address = IRpcBootstrap.getInstance().getLoadBalancer().selectService(appName, tempPath);
+        log.info("发现服务【{}】的提供者: {}", tempPath, address);
         // 2.判断服务的熔断器是否是打开状态
         Map<SocketAddress, Breaker> ipBreaker = IRpcBootstrap.getInstance().getConfiguration().getIpBreaker();
         Breaker breaker = ipBreaker.get(address);
@@ -54,7 +73,7 @@ public class RpcClientInvocationHandler implements InvocationHandler {
         Channel channel = getChannel(address);
         // 5.如果所有连接都拿到了，开始封装报文
         RequestPayload requestPayload = RequestPayload.builder()
-                .path(path)
+                .path(tempPath)
                 .methodName(method.getName())
                 .parametersType(method.getParameterTypes())
                 .parametersValue(args)

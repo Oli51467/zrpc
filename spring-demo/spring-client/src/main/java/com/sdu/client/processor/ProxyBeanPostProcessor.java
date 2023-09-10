@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.Field;
 
 import static com.sdu.irpc.framework.core.util.FileUtil.checkPath;
-import static com.sdu.irpc.framework.core.util.FileUtil.processPath;
 
 @Component
 public class ProxyBeanPostProcessor implements BeanPostProcessor {
@@ -33,8 +32,6 @@ public class ProxyBeanPostProcessor implements BeanPostProcessor {
                     String path = clientAnnotation.path();
                     // 检查路径是否合法
                     if (checkPath(path)) {
-                        // 对路径的特殊字符做处理
-                        path = processPath(path);
                         // 生成代理
                         Object proxy = ProxyFactory.getProxy(clazz, application, path);
                         field.setAccessible(true);
