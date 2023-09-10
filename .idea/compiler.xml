@@ -26,7 +26,15 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="client" options="-parameters" />
+      <module name="framework" options="-parameters" />
+      <module name="irpc-common" options="-parameters" />
+      <module name="irpc-core" options="-parameters" />
+      <module name="manager" options="-parameters" />
+      <module name="provider" options="-parameters" />
+      <module name="spring-client" options="-parameters" />
       <module name="spring-demo" options="" />
+      <module name="spring-provider" options="-parameters" />
     </option>
   </component>
 </project>
