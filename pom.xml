@@ -44,6 +44,7 @@
         <redis.version>3.0.0</redis.version>
         <redission.version>3.21.0</redission.version>
         <hutool.version>5.8.10</hutool.version>
+        <mybatis.version>3.5.3.2</mybatis.version>
     </properties>
 
     <dependencyManagement>
@@ -156,6 +157,13 @@
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-all</artifactId>
                 <version>${hutool.version}</version>
+            </dependency>
+
+            <!-- mybatis -->
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <version>${mybatis.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -15,13 +15,13 @@
         <module name="irpc-core" />
         <module name="spring-provider" />
         <module name="spring-client" />
-        <module name="transaction" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="api" target="17" />
       <module name="spring-p" target="17" />
       <module name="test" target="11" />
+      <module name="transaction" target="17" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
@@ -35,6 +35,7 @@
       <module name="spring-client" options="-parameters" />
       <module name="spring-demo" options="" />
       <module name="spring-provider" options="-parameters" />
+      <module name="transaction" options="-parameters" />
     </option>
   </component>
 </project>

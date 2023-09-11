@@ -1,6 +1,6 @@
 package com.sdu.irpc.framework.common.entity.holder;
 
-import com.sdu.irpc.framework.common.entity.RequestInfo;
+import com.sdu.irpc.framework.common.entity.dto.RequestInfo;
 
 public class UserContextHolder {
 

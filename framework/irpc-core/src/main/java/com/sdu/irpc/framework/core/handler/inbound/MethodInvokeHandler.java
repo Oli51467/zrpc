@@ -6,6 +6,7 @@ import com.sdu.irpc.framework.common.entity.rpc.RpcRequest;
 import com.sdu.irpc.framework.common.entity.rpc.RpcResponse;
 import com.sdu.irpc.framework.common.enums.RespCode;
 import com.sdu.irpc.framework.common.exception.MethodExecutionException;
+import com.sdu.irpc.framework.common.transaction.annotation.SecureInvoke;
 import com.sdu.irpc.framework.core.config.IRpcBootstrap;
 import com.sdu.irpc.framework.core.config.ServiceConfig;
 import com.sdu.irpc.framework.core.protection.Limiter;
@@ -14,6 +15,8 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -68,7 +71,7 @@ public class MethodInvokeHandler extends SimpleChannelInboundHandler<RpcRequest>
         // 设置响应时间戳 写回响应
         response.setTimeStamp(System.currentTimeMillis());
         if (channel.isActive() && channel.isOpen()) {
-            channel.writeAndFlush(response);
+            writeAndFlushWithTransaction(channel, response);
         }
         ShutdownContextHolder.REQUEST_COUNTER.decrement();
     }
@@ -94,5 +97,11 @@ public class MethodInvokeHandler extends SimpleChannelInboundHandler<RpcRequest>
             throw new RuntimeException(e);
         }
         return returnValue;
+    }
+
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED, rollbackFor = Exception.class)
+    @SecureInvoke
+    public void writeAndFlushWithTransaction(Channel channel, RpcResponse response) {
+        channel.writeAndFlush(response);
     }
 }

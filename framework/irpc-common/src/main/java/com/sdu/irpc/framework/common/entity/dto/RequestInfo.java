@@ -1,5 +1,5 @@
 
-package com.sdu.irpc.framework.common.entity;
+package com.sdu.irpc.framework.common.entity.dto;
 
 import lombok.Data;
 import lombok.Setter;

@@ -1,6 +1,6 @@
 package com.sdu.irpc.framework.core.handler.inbound;
 
-import com.sdu.irpc.framework.common.entity.RequestInfo;
+import com.sdu.irpc.framework.common.entity.dto.RequestInfo;
 import com.sdu.irpc.framework.common.entity.holder.UserContextHolder;
 import com.sdu.irpc.framework.common.util.NettyUtil;
 import io.netty.channel.ChannelHandlerContext;

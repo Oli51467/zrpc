@@ -1,6 +1,6 @@
 package com.sdu.irpc.framework.common.interceptor;
 
-import com.sdu.irpc.framework.common.entity.RequestInfo;
+import com.sdu.irpc.framework.common.entity.dto.RequestInfo;
 import com.sdu.irpc.framework.common.entity.holder.UserContextHolder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
