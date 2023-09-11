@@ -34,6 +34,9 @@ public class Configuration implements DefaultBoostrapConfig {
     private final Map<SocketAddress, Limiter> ipRateLimiter = new ConcurrentHashMap<>(16);
     private final Map<SocketAddress, Breaker> ipBreaker = new ConcurrentHashMap<>(16);
 
+    public Configuration() {
+    }
+
     public void setPort(Integer port) {
         this.port = port + 10000;
     }

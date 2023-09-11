@@ -51,4 +51,13 @@ public class SerializerFactory {
         }
         return serializerWrapper;
     }
+
+    /**
+     * 新增一个新的序列化器
+     *
+     * @param serializerObjectWrapper 序列化器的包装
+     */
+    public static void addSerializer(ObjectWrapper<Serializer> serializerObjectWrapper) {
+        SERIALIZER_CODE_CACHE.put(serializerObjectWrapper.getCode(), serializerObjectWrapper);
+    }
 }
