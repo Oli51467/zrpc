@@ -1,8 +1,7 @@
-package com.sdu.client.processor;
+package com.sdu.irpc.framework.core.proxy;
 
 import com.sdu.irpc.framework.common.annotation.IrpcClient;
 import com.sdu.irpc.framework.common.annotation.IrpcProxy;
-import com.sdu.irpc.framework.core.proxy.ProxyFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.annotation.Order;
