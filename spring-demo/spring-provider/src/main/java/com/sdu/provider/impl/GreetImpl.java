@@ -12,7 +12,7 @@ public class GreetImpl {
     }
 
     @IrpcMapping(path = "/cal")
-    public String greet1(int a, int b) {
+    public String cal(int a, int b) {
         int c = a + b;
         return "Result: " + c;
     }

@@ -1,6 +1,145 @@
-## 框架概述
+# Irpc
 
-iRpc远程调用框架包括以下模块或组件：
+## 如何Springboot中集成
+- 启动Zookeeper 默认端口为2181
+```shell
+cd ZOOKEEPER_ROOT_PATH
+bin/zkServer.sh start
+```
+- 运行manager模块下的ManagerApplication在zookeeper下创建基础持久节点。
+
+```java
+public class ManagerApplication {
+
+    public static void main(String[] args) {
+        ZooKeeper zooKeeper = ZookeeperUtil.createZookeeperConnection();
+        // 定义持久节点和数据
+        ZooKeeperNode baseNode = new ZooKeeperNode(BASE_PATH, null);
+        ZooKeeperNode providersNode = new ZooKeeperNode(getBaseProvidersPath(), null);
+        ZooKeeperNode clientsNode = new ZooKeeperNode(getBaseClientsPath(), null);
+        // 创建持久节点
+        List.of(baseNode, providersNode, clientsNode).forEach(node -> ZookeeperUtil.createNode(zooKeeper, node, null, CreateMode.PERSISTENT));
+        ZookeeperUtil.close(zooKeeper);
+    }
+}
+```
+
+### 服务端
+
+- 启动Zookeeper 默认端口为2181
+```shell
+cd ZOOKEEPER_ROOT_PATH
+bin/zkServer.sh start
+```
+- 使用@EnableIrpc注解开启Irpc远程调用，basePackages为接口实现所在的包
+```java
+@SpringBootApplication
+@ComponentScan("com.sdu")
+@EnableIrpc(basePackages = "com.sdu.provider.impl")
+public class SpringProviderApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(SpringProviderApplication.class, args);
+    }
+}
+```
+
+- 在接口实现类上使用@IrpcService声明这是一个远程调用服务。
+
+可以添加参数application指定服务的应用名和该类接口的根路径path。
+
+在每一个接口的实现上，使用@IrpcMapping注解声明接口的子路径，如果同一路径不可以被声明两次或多次
+```java
+@IrpcService(application = "p1", path = "/test")
+public class GreetImpl {
+
+    @IrpcMapping(path = "/echo")
+    public String greet(String message) {
+        return "Server echo greeting!";
+    }
+
+    @IrpcMapping(path = "/cal")
+    public String cal(int a, int b) {
+        int c = a + b;
+        return "Result: " + c;
+    }
+}
+```
+此时，GreetImpl下的greet方法会被注册到Zookeeper到临时节点上，路径为/irpc-metadata/providers/p1/test.echo/xxx.xxx.xxx.xxx:${PORT}
+此时，GreetImpl下的cal方法会被注册到Zookeeper到临时节点上，路径为/irpc-metadata/providers/p1/test.cal/xxx.xxx.xxx.xxx:${PORT}
+
+### 客户端
+- 启动Zookeeper 默认端口为2181
+```shell
+cd ZOOKEEPER_ROOT_PATH
+bin/zkServer.sh start
+```
+- 在启动类加上@EnableAspectJAutoProxy注解
+```java
+@SpringBootApplication
+@ComponentScan("com.sdu")
+@EnableAspectJAutoProxy
+public class SpringClientApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(SpringClientApplication.class, args);
+    }
+}
+```
+
+- 创建一个接口类，比如RpcClient。
+
+在类上使用注解```@IrpcClient(application = "p1", path = "/test")```
+表示在该类下声明了远程调用的应用名"p1"和调用服务的根路径"/test"。
+
+声明一个接口：greet，在该接口上使用@IrpcMapping(path = "/echo")注解，表示将该方法映射到远程p1服务的/test/echo路径下。
+
+可以声明多个接口，保证每个接口的路径唯一。
+
+完整的RpcClient接口代码如下：
+```java
+@IrpcClient(application = "p1", path = "/test")
+public interface RpcClient {
+
+    @IrpcMapping(path = "/echo")
+    String greet(String message);
+
+    @IrpcMapping(path = "/cal")
+    String cal(int a, int b);
+}
+```
+
+- 接口调用
+
+使用@IrpcProxy注解声明一个Irpc客户端，调用接口的具体方法。完整代码如下：
+```java
+@RestController
+@Slf4j
+public class TestController {
+
+    @IrpcProxy
+    public RpcClient client;
+
+    @RequestMapping(value = "/echo", method = RequestMethod.GET)
+    public String greet() {
+        return client.greet("Client say hi");
+    }
+
+    @RequestMapping(value = "/cal", method = RequestMethod.GET)
+    public String cal() {
+        return client.cal(5, 5);
+    }
+}
+```
+
+### 测试接口
+- 测试/cal接口
+
+![cal接口](./imgs/impl-cal.png)
+- 测试/echo接口
+
+![echo接口](./imgs/impl-echo.png)
+
+## 通信架构
 
 ### 通信层
 
