@@ -29,28 +29,28 @@ public class UpAndDownWatcher implements Watcher {
             String[] pathArgs = event.getPath().split("/");
             String pathName = pathArgs[pathArgs.length - 1];
             String appName = pathArgs[pathArgs.length - 2];
-            Registry registry = IRpcBootstrap.getInstance().getRegistry();
+            Registry registry = RpcBootstrap.getInstance().getRegistry();
             List<InetSocketAddress> addressList = registry.discover(appName, pathName);
             // 处理新增的节点
             for (InetSocketAddress address : addressList) {
-                if (!IRpcBootstrap.CHANNEL_CACHE.containsKey(address)) {
+                if (!RpcBootstrap.CHANNEL_CACHE.containsKey(address)) {
                     Channel channel;
                     try {
                         channel = NettyBoostrapInitializer.getBootstrap().connect(address).sync().channel();
-                        IRpcBootstrap.CHANNEL_CACHE.put(address, channel);
+                        RpcBootstrap.CHANNEL_CACHE.put(address, channel);
                     } catch (InterruptedException e) {
                         throw new NetworkException("获取通道连接时发生了异常。");
                     }
                 }
             }
             // 处理下线的节点
-            for (Map.Entry<InetSocketAddress, Channel> entry : IRpcBootstrap.CHANNEL_CACHE.entrySet()) {
+            for (Map.Entry<InetSocketAddress, Channel> entry : RpcBootstrap.CHANNEL_CACHE.entrySet()) {
                 if (!addressList.contains(entry.getKey())) {
-                    IRpcBootstrap.CHANNEL_CACHE.remove(entry.getKey());
+                    RpcBootstrap.CHANNEL_CACHE.remove(entry.getKey());
                 }
             }
             // 重新负载均衡
-            IRpcBootstrap.getInstance().getLoadBalancer().reload(pathName, addressList);
+            RpcBootstrap.getInstance().getLoadBalancer().reload(pathName, addressList);
         }
     }
 }
@@ -70,7 +70,7 @@ public class UpAndDownWatcher implements Watcher {
 
 代码如下：
 ``` java
-public IRpcBootstrap scanServices(String packageName) {
+public RpcBootstrap scanServices(String packageName) {
     // 1、需要通过packageName获取其下的所有的类的权限定名称
     List<String> classNames = FileUtil.getAllClassNames(packageName);
     List<Class<?>> classes = FileUtil.filterClassWithServiceAnnotation(classNames);

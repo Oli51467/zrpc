@@ -1,6 +1,6 @@
 ### 通过工厂配置注册中心
 
-IRpcBootstrap是单例模式，所有的配置在Configuration中定义了默认的配置
+RpcBootstrap是单例模式，所有的配置在Configuration中定义了默认的配置
 
 抽象注册中心：
 
@@ -60,7 +60,7 @@ public class ZooKeeperRegistry extends AbstractRegistry {
             log.info("方法节点创建");
         }
         // 创建临时本机节点(ip节点)
-        String finalNodePath = getPath(pathNode, NetUtil.getIp(IRpcBootstrap.getInstance().getConfiguration().getPort()));
+        String finalNodePath = getPath(pathNode, NetUtil.getIp(RpcBootstrap.getInstance().getConfiguration().getPort()));
         if (!ZookeeperUtil.exists(zooKeeper, finalNodePath, null)) {
             ZooKeeperNode node = new ZooKeeperNode(finalNodePath, null);
             ZookeeperUtil.createNode(zooKeeper, node, null, CreateMode.EPHEMERAL);
@@ -99,7 +99,7 @@ public class ZooKeeperRegistry extends AbstractRegistry {
 服务端发布服务，调用```register()```方法
 
 ``` javascript
-public IRpcBootstrap publish(ServiceConfig<?> service) {
+public RpcBootstrap publish(ServiceConfig<?> service) {
     configuration.getRegistryConfig().getRegistry().register(service);
     return this;
 }

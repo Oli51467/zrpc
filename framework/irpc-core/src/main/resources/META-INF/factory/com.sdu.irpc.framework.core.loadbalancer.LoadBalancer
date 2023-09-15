@@ -1,3 +1,0 @@
-2-CONSISTENT_HASH-com.sdu.irpc.framework.core.loadbalancer.impl.ConsistentHashBalancer
-1-ROUND_ROBIN-com.sdu.irpc.framework.core.loadbalancer.impl.RoundRobinLoadBalancer
-3-RESPONSE_TIME-com.sdu.irpc.framework.core.loadbalancer.impl.ResponseTimeLoadBalancer

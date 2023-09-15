@@ -31,7 +31,7 @@ public class ClientChannelHandler extends ChannelInitializer<SocketChannel> {
 }
 ```
 
-IRpc维护了客户端的连接
+Rpc维护了客户端的连接
 ```
 public static final Map<InetSocketAddress, Channel> CHANNEL_CACHE = new ConcurrentHashMap<>(16);
 ```

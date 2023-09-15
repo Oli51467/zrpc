@@ -1,6 +1,4 @@
-# Irpc
-
-## 如何Springboot中集成
+## 如何在Springboot中集成Sparrow
 - 启动Zookeeper 默认端口为2181
 ```shell
 cd ZOOKEEPER_ROOT_PATH
@@ -31,11 +29,11 @@ public class ManagerApplication {
 cd ZOOKEEPER_ROOT_PATH
 bin/zkServer.sh start
 ```
-- 使用@EnableIrpc注解开启Irpc远程调用，basePackages为接口实现所在的包
+- 使用@EnableSparrow注解开启Rpc远程调用，basePackages为接口实现所在的包
 ```java
 @SpringBootApplication
 @ComponentScan("com.sdu")
-@EnableIrpc(basePackages = "com.sdu.provider.impl")
+@EnableSparrow(basePackages = "com.sdu.provider.impl")
 public class SpringProviderApplication {
 
     public static void main(String[] args) {
@@ -44,29 +42,29 @@ public class SpringProviderApplication {
 }
 ```
 
-- 在接口实现类上使用@IrpcService声明这是一个远程调用服务。
+- 在接口实现类上使用@RpcService声明这是一个远程调用服务。
 
 可以添加参数application指定服务的应用名和该类接口的根路径path。
 
-在每一个接口的实现上，使用@IrpcMapping注解声明接口的子路径，如果同一路径不可以被声明两次或多次
+在每一个接口的实现上，使用@RpcMapping注解声明接口的子路径，如果同一路径不可以被声明两次或多次
 ```java
-@IrpcService(application = "p1", path = "/test")
+@RpcService(application = "p1", path = "/test")
 public class GreetImpl {
 
-    @IrpcMapping(path = "/echo")
+    @RpcMapping(path = "/echo")
     public String greet(String message) {
         return "Server echo greeting!";
     }
 
-    @IrpcMapping(path = "/cal")
+    @RpcMapping(path = "/cal")
     public String cal(int a, int b) {
         int c = a + b;
         return "Result: " + c;
     }
 }
 ```
-此时，GreetImpl下的greet方法会被注册到Zookeeper到临时节点上，路径为/irpc-metadata/providers/p1/test.echo/xxx.xxx.xxx.xxx:${PORT}
-此时，GreetImpl下的cal方法会被注册到Zookeeper到临时节点上，路径为/irpc-metadata/providers/p1/test.cal/xxx.xxx.xxx.xxx:${PORT}
+此时，GreetImpl下的greet方法会被注册到Zookeeper到临时节点上，路径为/sparrow-metadata/providers/p1/test.echo/xxx.xxx.xxx.xxx:${PORT}
+此时，GreetImpl下的cal方法会被注册到Zookeeper到临时节点上，路径为/sparrow-metadata/providers/p1/test.cal/xxx.xxx.xxx.xxx:${PORT}
 
 ### 客户端
 - 启动Zookeeper 默认端口为2181
@@ -88,35 +86,35 @@ public class SpringClientApplication {
 
 - 创建一个接口类，比如RpcClient。
 
-在类上使用注解```@IrpcClient(application = "p1", path = "/test")```
+在类上使用注解```@RpcClient(application = "p1", path = "/test")```
 表示在该类下声明了远程调用的应用名"p1"和调用服务的根路径"/test"。
 
-声明一个接口：greet，在该接口上使用@IrpcMapping(path = "/echo")注解，表示将该方法映射到远程p1服务的/test/echo路径下。
+声明一个接口：greet，在该接口上使用@RpcMapping(path = "/echo")注解，表示将该方法映射到远程p1服务的/test/echo路径下。
 
 可以声明多个接口，保证每个接口的路径唯一。
 
 完整的RpcClient接口代码如下：
 ```java
-@IrpcClient(application = "p1", path = "/test")
+@RpcClient(application = "p1", path = "/test")
 public interface RpcClient {
 
-    @IrpcMapping(path = "/echo")
+    @RpcMapping(path = "/echo")
     String greet(String message);
 
-    @IrpcMapping(path = "/cal")
+    @RpcMapping(path = "/cal")
     String cal(int a, int b);
 }
 ```
 
 - 接口调用
 
-使用@IrpcProxy注解声明一个Irpc客户端，调用接口的具体方法。完整代码如下：
+使用@RpcProxy注解声明一个Rpc客户端，调用接口的具体方法。完整代码如下：
 ```java
 @RestController
 @Slf4j
 public class TestController {
 
-    @IrpcProxy
+    @RpcProxy
     public RpcClient client;
 
     @RequestMapping(value = "/echo", method = RequestMethod.GET)
@@ -226,7 +224,7 @@ public class TestController {
 
 ### Header
 
-- ```Magic Number 4B```：魔数，用于识别该协议 例如：0xirpc
+- ```Magic Number 4B```：魔数，用于识别该协议 例如：0xspar
 - ```Version 1B```：协议版本号
 - ```Header Length 4B```：Header部分的长度
 - ```Body Length 4B```：Body部分的长度

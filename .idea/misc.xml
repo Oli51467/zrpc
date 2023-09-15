@@ -5,6 +5,8 @@
     <option name="originalFiles">
       <list>
         <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$PROJECT_DIR$/framework/irpc-common/pom.xml" />
+        <option value="$PROJECT_DIR$/sparrow-framework/sparrow-common/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">

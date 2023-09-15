@@ -8,7 +8,7 @@ private Object doInvoke(RequestPayload requestPayload) {
     Object[] parametersValue = requestPayload.getParametersValue();
 
     // 寻找服务的具体实现
-    ServiceConfig<?> serviceConfig = IRpcBootstrap.SERVICE_MAP.get(targetInterfaceName);
+    ServiceConfig<?> serviceConfig = RpcBootstrap.SERVICE_MAP.get(targetInterfaceName);
     Object referenceImpl = serviceConfig.getReference();
     // 获取方法对象 通过反射调用invoke方法
     Object returnValue;

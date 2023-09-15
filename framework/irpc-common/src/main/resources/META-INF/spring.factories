@@ -1,3 +1,0 @@
-# Auto Configure
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.sdu.irpc.framework.common.transaction.config.TransactionAutoConfiguration

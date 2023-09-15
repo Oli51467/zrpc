@@ -1,17 +1,17 @@
 package com.sdu.provider.impl;
 
-import com.sdu.irpc.framework.common.annotation.IrpcMapping;
-import com.sdu.irpc.framework.common.annotation.IrpcService;
+import com.sdu.sparrow.framework.common.annotation.RpcMapping;
+import com.sdu.sparrow.framework.common.annotation.RpcService;
 
-@IrpcService(application = "p1", path = "/test")
+@RpcService(application = "p1", path = "/test")
 public class GreetImpl {
 
-    @IrpcMapping(path = "/echo")
+    @RpcMapping(path = "/echo")
     public String greet(String message) {
         return "Server echo greeting!";
     }
 
-    @IrpcMapping(path = "/cal")
+    @RpcMapping(path = "/cal")
     public String cal(int a, int b) {
         int c = a + b;
         return "Result: " + c;

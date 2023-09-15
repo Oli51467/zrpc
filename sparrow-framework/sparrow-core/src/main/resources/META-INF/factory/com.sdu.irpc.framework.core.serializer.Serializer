@@ -1,0 +1,3 @@
+1-JDK-com.sdu.sparrow.framework.core.serializer.impl.JdkSerializer
+2-JSON-com.sdu.sparrow.framework.core.serializer.impl.JsonSerializer
+3-HESSIAN-com.sdu.sparrow.framework.core.serializer.impl.HessianSerializer

@@ -12,13 +12,13 @@
     </parent>
 
     <groupId>com.sdu</groupId>
-    <artifactId>iRpc</artifactId>
-    <version>1.0.0</version>
+    <artifactId>sparrow-rpc</artifactId>
+    <version>1.0</version>
     <packaging>pom</packaging>
     <modules>
-        <module>framework</module>
-        <module>framework/irpc-common</module>
-        <module>framework/irpc-core</module>
+        <module>sparrow-framework</module>
+        <module>sparrow-framework/sparrow-common</module>
+        <module>sparrow-framework/sparrow-core</module>
         <module>manager</module>
         <module>client</module>
         <module>provider</module>
