@@ -1,8 +1,8 @@
 package com.sdu.sparrow.framework.core.proxy;
 
 import com.sdu.sparrow.framework.common.enums.SerializationType;
-import com.sdu.sparrow.framework.core.config.RpcBootstrap;
 import com.sdu.sparrow.framework.core.config.ReferenceConfig;
+import com.sdu.sparrow.framework.core.config.RpcBootstrap;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

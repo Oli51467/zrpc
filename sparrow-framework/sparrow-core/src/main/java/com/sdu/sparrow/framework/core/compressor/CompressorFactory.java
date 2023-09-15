@@ -2,7 +2,7 @@ package com.sdu.sparrow.framework.core.compressor;
 
 import com.sdu.sparrow.framework.common.entity.ObjectWrapper;
 import com.sdu.sparrow.framework.common.enums.CompressionType;
-import com.sdu.sparrow.framework.core.compressor.impl.GzipCompressor;
+import com.sdu.sparrow.framework.core.compressor.impl.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -16,8 +16,23 @@ public class CompressorFactory {
 
     static {
         ObjectWrapper<Compressor> gzip = new ObjectWrapper<>((byte) 1, CompressionType.GZIP.name(), new GzipCompressor());
+        ObjectWrapper<Compressor> deflate = new ObjectWrapper<>((byte) 2, CompressionType.DEFLATE.name(), new DeflateCompressor());
+        ObjectWrapper<Compressor> bzip2 = new ObjectWrapper<>((byte) 3, CompressionType.BZIP2.name(), new Bzip2Compressor());
+        ObjectWrapper<Compressor> lzo = new ObjectWrapper<>((byte) 4, CompressionType.LZO.name(), new LzoCompressor());
+        ObjectWrapper<Compressor> snappy = new ObjectWrapper<>((byte) 5, CompressionType.SNAPPY.name(), new SnappyCompressor());
+        ObjectWrapper<Compressor> lz4 = new ObjectWrapper<>((byte) 6, CompressionType.LZ4.name(), new Lz4Compressor());
         COMPRESSOR_CACHE.put(CompressionType.GZIP, gzip);
+        COMPRESSOR_CACHE.put(CompressionType.DEFLATE, deflate);
+        COMPRESSOR_CACHE.put(CompressionType.BZIP2, bzip2);
+        COMPRESSOR_CACHE.put(CompressionType.LZO, lzo);
+        COMPRESSOR_CACHE.put(CompressionType.SNAPPY, snappy);
+        COMPRESSOR_CACHE.put(CompressionType.LZ4, lz4);
         COMPRESSOR_CODE_CACHE.put((byte) 1, gzip);
+        COMPRESSOR_CODE_CACHE.put((byte) 2, deflate);
+        COMPRESSOR_CODE_CACHE.put((byte) 3, bzip2);
+        COMPRESSOR_CODE_CACHE.put((byte) 4, lzo);
+        COMPRESSOR_CODE_CACHE.put((byte) 5, snappy);
+        COMPRESSOR_CODE_CACHE.put((byte) 6, lz4);
     }
 
     /**

@@ -260,3 +260,5 @@ public class GzipCompressor implements Compressor {
     }
 }
 ```
+
+还扩展了Deflate、Bzip2、Lzo等压缩方式

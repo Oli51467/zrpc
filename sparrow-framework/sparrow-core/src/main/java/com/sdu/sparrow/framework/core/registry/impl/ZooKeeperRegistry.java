@@ -1,11 +1,11 @@
 package com.sdu.sparrow.framework.core.registry.impl;
 
 import com.sdu.sparrow.framework.common.entity.ZooKeeperNode;
-import com.sdu.sparrow.framework.core.config.RpcBootstrap;
-import com.sdu.sparrow.framework.core.config.ServiceConfig;
 import com.sdu.sparrow.framework.common.exception.DiscoveryException;
 import com.sdu.sparrow.framework.common.util.NetUtil;
 import com.sdu.sparrow.framework.common.util.ZookeeperUtil;
+import com.sdu.sparrow.framework.core.config.RpcBootstrap;
+import com.sdu.sparrow.framework.core.config.ServiceConfig;
 import com.sdu.sparrow.framework.core.registry.AbstractRegistry;
 import com.sdu.sparrow.framework.core.watcher.UpAndDownWatcher;
 import lombok.extern.slf4j.Slf4j;

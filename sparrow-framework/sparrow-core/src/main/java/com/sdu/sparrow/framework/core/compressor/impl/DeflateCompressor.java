@@ -7,34 +7,33 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.Inflater;
+import java.util.zip.InflaterInputStream;
 
-/**
- * 使用gzip算法进行压缩的具体实现
- */
 @Slf4j
-public class GzipCompressor implements Compressor {
+public class DeflateCompressor implements Compressor {
 
     @Override
     public byte[] compress(byte[] bytes) {
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-             GZIPOutputStream gzipOutputStream = new GZIPOutputStream(byteArrayOutputStream)) {
-            gzipOutputStream.write(bytes);
-            gzipOutputStream.finish();
+             DeflaterOutputStream deflaterOutputStream = new DeflaterOutputStream(byteArrayOutputStream)) {
+            deflaterOutputStream.write(bytes);
+            deflaterOutputStream.finish();
             return byteArrayOutputStream.toByteArray();
         } catch (IOException e) {
             log.error("对字节数组进行压缩时发生异常", e);
             throw new CompressException(e);
         }
-
     }
 
     @Override
     public byte[] decompress(byte[] bytes) {
+        Inflater inflater = new Inflater();
+        inflater.setInput(bytes);
         try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
-             GZIPInputStream gzipInputStream = new GZIPInputStream(byteArrayInputStream)) {
-            return gzipInputStream.readAllBytes();
+             InflaterInputStream inflaterInputStream = new InflaterInputStream(byteArrayInputStream)) {
+            return inflaterInputStream.readAllBytes();
         } catch (IOException e) {
             log.error("对字节数组进行压缩时发生异常", e);
             throw new CompressException(e);

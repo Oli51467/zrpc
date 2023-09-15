@@ -3,38 +3,33 @@ package com.sdu.sparrow.framework.core.compressor.impl;
 import com.sdu.sparrow.framework.common.exception.CompressException;
 import com.sdu.sparrow.framework.core.compressor.Compressor;
 import lombok.extern.slf4j.Slf4j;
+import org.anarres.lzo.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
-/**
- * 使用gzip算法进行压缩的具体实现
- */
 @Slf4j
-public class GzipCompressor implements Compressor {
+public class LzoCompressor implements Compressor {
 
     @Override
     public byte[] compress(byte[] bytes) {
-        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-             GZIPOutputStream gzipOutputStream = new GZIPOutputStream(byteArrayOutputStream)) {
-            gzipOutputStream.write(bytes);
-            gzipOutputStream.finish();
-            return byteArrayOutputStream.toByteArray();
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+             LzoOutputStream lzoOutputStream = new LzoOutputStream(outputStream)) {
+            lzoOutputStream.write(bytes);
+            return outputStream.toByteArray();
         } catch (IOException e) {
             log.error("对字节数组进行压缩时发生异常", e);
             throw new CompressException(e);
         }
-
     }
 
     @Override
     public byte[] decompress(byte[] bytes) {
-        try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
-             GZIPInputStream gzipInputStream = new GZIPInputStream(byteArrayInputStream)) {
-            return gzipInputStream.readAllBytes();
+        LzoDecompressor decompressor = LzoLibrary.getInstance().newDecompressor(LzoAlgorithm.LZO1X, null);
+        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
+             LzoInputStream lzoInputStream = new LzoInputStream(inputStream, decompressor)) {
+            return lzoInputStream.readAllBytes();
         } catch (IOException e) {
             log.error("对字节数组进行压缩时发生异常", e);
             throw new CompressException(e);

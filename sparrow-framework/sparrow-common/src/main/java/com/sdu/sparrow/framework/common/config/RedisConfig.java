@@ -1,6 +1,5 @@
 package com.sdu.sparrow.framework.common.config;
 
-import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
