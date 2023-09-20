@@ -1,8 +1,8 @@
 package com.sdu.client.controller;
 
-import com.sdu.client.rpc.SparrowRpcClient;
-import com.sdu.sparrow.framework.common.annotation.FrequencyControl;
-import com.sdu.sparrow.framework.common.annotation.RpcProxy;
+import com.sdu.client.rpc.ArrowRpcClient;
+import com.sdu.arrow.framework.common.annotation.FrequencyControl;
+import com.sdu.arrow.framework.common.annotation.RpcProxy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestController {
 
     @RpcProxy
-    public SparrowRpcClient client;
+    public ArrowRpcClient client;
 
     @RequestMapping(value = "/echo", method = RequestMethod.GET)
     @FrequencyControl(time = 3, count = 1, target = FrequencyControl.Target.IP)

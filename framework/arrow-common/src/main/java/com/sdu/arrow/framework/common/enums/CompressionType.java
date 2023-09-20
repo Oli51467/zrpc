@@ -1,0 +1,10 @@
+package com.sdu.arrow.framework.common.enums;
+
+public enum CompressionType {
+    GZIP,
+    DEFLATE,
+    BZIP2,
+    LZO,
+    SNAPPY,
+    LZ4
+}

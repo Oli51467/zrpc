@@ -26,7 +26,7 @@
 
         <dependency>
             <groupId>com.sdu</groupId>
-            <artifactId>sparrow-core</artifactId>
+            <artifactId>arrow-core</artifactId>
             <version>1.0</version>
         </dependency>
 

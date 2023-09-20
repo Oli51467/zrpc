@@ -1,6 +1,6 @@
 package com.sdu.provider;
 
-import com.sdu.sparrow.framework.common.annotation.EnableSparrow;
+import com.sdu.arrow.framework.common.annotation.EnableArrow;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @SpringBootApplication
 @ComponentScan("com.sdu")
 @MapperScan("com.sdu")
-@EnableSparrow(basePackages = "com.sdu.provider.impl")
+@EnableArrow(basePackages = "com.sdu.provider.impl")
 @EnableAspectJAutoProxy
 @EnableTransactionManagement
 public class SpringProviderApplication {

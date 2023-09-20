@@ -1,7 +1,7 @@
 package com.sdu.provider.impl;
 
-import com.sdu.sparrow.framework.common.annotation.RpcMapping;
-import com.sdu.sparrow.framework.common.annotation.RpcService;
+import com.sdu.arrow.framework.common.annotation.RpcMapping;
+import com.sdu.arrow.framework.common.annotation.RpcService;
 
 @RpcService(application = "p1", path = "/test")
 public class GreetImpl {

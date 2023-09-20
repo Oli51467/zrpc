@@ -1,4 +1,4 @@
-## 如何在Springboot中集成Sparrow
+## 在Springboot中集成ArrowRPC
 - 启动Zookeeper 默认端口为2181
 ```shell
 cd ZOOKEEPER_ROOT_PATH
@@ -29,11 +29,11 @@ public class ManagerApplication {
 cd ZOOKEEPER_ROOT_PATH
 bin/zkServer.sh start
 ```
-- 使用@EnableSparrow注解开启Rpc远程调用，basePackages为接口实现所在的包
+- 使用@Enablearrow注解开启Rpc远程调用，basePackages为接口实现所在的包
 ```java
 @SpringBootApplication
 @ComponentScan("com.sdu")
-@EnableSparrow(basePackages = "com.sdu.provider.impl")
+@Enablearrow(basePackages = "com.sdu.provider.impl")
 public class SpringProviderApplication {
 
     public static void main(String[] args) {
@@ -63,8 +63,8 @@ public class GreetImpl {
     }
 }
 ```
-此时，GreetImpl下的greet方法会被注册到Zookeeper到临时节点上，路径为/sparrow-metadata/providers/p1/test.echo/xxx.xxx.xxx.xxx:${PORT}
-此时，GreetImpl下的cal方法会被注册到Zookeeper到临时节点上，路径为/sparrow-metadata/providers/p1/test.cal/xxx.xxx.xxx.xxx:${PORT}
+此时，GreetImpl下的greet方法会被注册到Zookeeper到临时节点上，路径为/arrow-metadata/providers/p1/test.echo/xxx.xxx.xxx.xxx:${PORT}
+此时，GreetImpl下的cal方法会被注册到Zookeeper到临时节点上，路径为/arrow-metadata/providers/p1/test.cal/xxx.xxx.xxx.xxx:${PORT}
 
 ### 客户端
 - 启动Zookeeper 默认端口为2181
