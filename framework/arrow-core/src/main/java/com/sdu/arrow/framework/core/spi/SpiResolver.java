@@ -4,8 +4,8 @@ import com.sdu.arrow.framework.common.entity.ObjectWrapper;
 import com.sdu.arrow.framework.core.compressor.Compressor;
 import com.sdu.arrow.framework.core.compressor.CompressorFactory;
 import com.sdu.arrow.framework.core.config.Configuration;
-import com.sdu.arrow.framework.core.loadbalancer.LoadBalancer;
-import com.sdu.arrow.framework.core.loadbalancer.LoadBalancerFactory;
+import com.sdu.arrow.framework.core.loadbalance.LoadBalance;
+import com.sdu.arrow.framework.core.loadbalance.LoadBalanceFactory;
 import com.sdu.arrow.framework.core.serializer.Serializer;
 import com.sdu.arrow.framework.core.serializer.SerializerFactory;
 
@@ -21,10 +21,10 @@ public class SpiResolver {
     public void loadFromSpi(Configuration configuration) {
 
         // 我的spi的文件中配置了很多实现（自由定义，只能配置一个实现，还是多个）
-        List<ObjectWrapper<LoadBalancer>> loadBalancerObjectWrappers = SpiHandler.getList(LoadBalancer.class);
+        List<ObjectWrapper<LoadBalance>> loadBalanceObjectWrappers = SpiHandler.getList(LoadBalance.class);
         // 将其放入工厂
-        if (loadBalancerObjectWrappers != null && loadBalancerObjectWrappers.size() > 0) {
-            loadBalancerObjectWrappers.forEach(LoadBalancerFactory::addLoadBalancer);
+        if (loadBalanceObjectWrappers != null && loadBalanceObjectWrappers.size() > 0) {
+            loadBalanceObjectWrappers.forEach(LoadBalanceFactory::addLoadBalanceStrategy);
         }
 
         List<ObjectWrapper<Compressor>> compressorObjectWrappers = SpiHandler.getList(Compressor.class);

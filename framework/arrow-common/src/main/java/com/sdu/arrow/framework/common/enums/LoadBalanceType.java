@@ -1,8 +1,9 @@
 package com.sdu.arrow.framework.common.enums;
 
-public enum LoadBalancerType {
+public enum LoadBalanceType {
 
     ROUND_ROBIN,
     CONSISTENT_HASH,
-    RESPONSE_TIME
+    RESPONSE_TIME,
+    RANDOM
 }

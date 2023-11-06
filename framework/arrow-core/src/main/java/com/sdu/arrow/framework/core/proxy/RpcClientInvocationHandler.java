@@ -58,7 +58,7 @@ public class RpcClientInvocationHandler implements InvocationHandler {
         // 对路径的特殊字符做处理
         tempPath = processPath(tempPath);
         // 1.寻找该服务的可用节点，通过客户端负载均衡寻找一个可用的服务。如果找不到会抛出一个异常
-        InetSocketAddress address = RpcBootstrap.getInstance().getLoadBalancer().selectService(appName, tempPath);
+        InetSocketAddress address = RpcBootstrap.getInstance().getLoadBalanceType().selectService(appName, tempPath);
         log.info("发现服务【{}】的提供者: {}", tempPath, address);
         // 2.判断服务的熔断器是否是打开状态
         Map<SocketAddress, Breaker> ipBreaker = RpcBootstrap.getInstance().getConfiguration().getIpBreaker();

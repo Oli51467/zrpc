@@ -1,9 +1,9 @@
-package com.sdu.arrow.framework.core.loadbalancer.impl;
+package com.sdu.arrow.framework.core.loadbalance.impl;
 
 import com.sdu.arrow.framework.common.entity.rpc.RpcRequest;
 import com.sdu.arrow.framework.common.entity.rpc.RpcRequestHolder;
-import com.sdu.arrow.framework.core.loadbalancer.AbstractLoadBalancer;
-import com.sdu.arrow.framework.core.loadbalancer.Selector;
+import com.sdu.arrow.framework.core.loadbalance.AbstractLoadBalance;
+import com.sdu.arrow.framework.core.loadbalance.Selector;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
@@ -18,7 +18,7 @@ import java.util.TreeMap;
  * 一致性hash的负载均衡策略
  */
 @Slf4j
-public class ConsistentHashLoadBalancer extends AbstractLoadBalancer {
+public class ConsistentHashLoadBalance extends AbstractLoadBalance {
 
     @Override
     protected Selector initSelector(List<InetSocketAddress> serviceList) {

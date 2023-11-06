@@ -1,8 +1,8 @@
-package com.sdu.arrow.framework.core.loadbalancer.impl;
+package com.sdu.arrow.framework.core.loadbalance.impl;
 
-import com.sdu.arrow.framework.common.exception.LoadBalancerException;
-import com.sdu.arrow.framework.core.loadbalancer.AbstractLoadBalancer;
-import com.sdu.arrow.framework.core.loadbalancer.Selector;
+import com.sdu.arrow.framework.common.exception.LoadBalanceException;
+import com.sdu.arrow.framework.core.loadbalance.AbstractLoadBalance;
+import com.sdu.arrow.framework.core.loadbalance.Selector;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
-public class RoundRobinLoadBalancer extends AbstractLoadBalancer {
+public class RoundRobinLoadBalance extends AbstractLoadBalance {
 
     @Override
     protected Selector initSelector(List<InetSocketAddress> serviceList) {
@@ -32,9 +32,9 @@ public class RoundRobinLoadBalancer extends AbstractLoadBalancer {
 
         @Override
         public InetSocketAddress select() {
-            if (null == serviceList || serviceList.size() == 0) {
+            if (null == serviceList || serviceList.isEmpty()) {
                 log.error("进行负载均衡选取节点时发现服务列表为空.");
-                throw new LoadBalancerException();
+                throw new LoadBalanceException();
             }
             InetSocketAddress address = serviceList.get(index.get());
             if (index.get() == serviceList.size() - 1) {

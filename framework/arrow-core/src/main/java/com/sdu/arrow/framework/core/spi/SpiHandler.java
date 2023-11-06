@@ -58,7 +58,7 @@ public class SpiHandler {
         buildCache(clazz);
 
         List<ObjectWrapper<?>> result = SPI_IMPLEMENT.get(clazz);
-        if (result == null || result.size() == 0) {
+        if (result == null || result.isEmpty()) {
             return null;
         }
 
@@ -97,7 +97,7 @@ public class SpiHandler {
         // 通过clazz获取与之匹配的实现名称
         String clazzName = clazz.getName();
         List<String> implNames = SPI_CONTENT.get(clazzName);
-        if (null == implNames || implNames.size() == 0) {
+        if (null == implNames || implNames.isEmpty()) {
             return;
         }
         // 实例化所有的实现

@@ -1,8 +1,8 @@
-package com.sdu.arrow.framework.core.loadbalancer.impl;
+package com.sdu.arrow.framework.core.loadbalance.impl;
 
 import com.sdu.arrow.framework.core.config.RpcBootstrap;
-import com.sdu.arrow.framework.core.loadbalancer.AbstractLoadBalancer;
-import com.sdu.arrow.framework.core.loadbalancer.Selector;
+import com.sdu.arrow.framework.core.loadbalance.AbstractLoadBalance;
+import com.sdu.arrow.framework.core.loadbalance.Selector;
 import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,7 +14,7 @@ import java.util.Map;
  * 最短响应时间的负载均衡策略
  */
 @Slf4j
-public class ResponseTimeLoadBalancer extends AbstractLoadBalancer {
+public class ResponseTimeLoadBalance extends AbstractLoadBalance {
 
     @Override
     protected Selector initSelector(List<InetSocketAddress> serviceList) {
@@ -22,9 +22,6 @@ public class ResponseTimeLoadBalancer extends AbstractLoadBalancer {
     }
 
     private static class ResponseTimeSelector implements Selector {
-        private ResponseTimeSelector() {
-
-        }
 
         @Override
         public InetSocketAddress select() {

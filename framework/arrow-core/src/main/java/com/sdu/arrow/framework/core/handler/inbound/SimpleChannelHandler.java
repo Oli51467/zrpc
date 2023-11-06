@@ -7,6 +7,7 @@ import com.sdu.arrow.framework.common.enums.RespCode;
 import com.sdu.arrow.framework.common.exception.ResponseException;
 import com.sdu.arrow.framework.core.config.RpcBootstrap;
 import com.sdu.arrow.framework.core.protection.Breaker;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,8 @@ public class SimpleChannelHandler extends SimpleChannelInboundHandler<RpcRespons
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, RpcResponse response) {
         CompletableFuture<Object> completableFuture = RpcBootstrap.PENDING_REQUEST.get(response.getRequestId());
-        SocketAddress socketAddress = channelHandlerContext.channel().remoteAddress();
+        Channel channel = channelHandlerContext.channel();
+        SocketAddress socketAddress = channel.remoteAddress();
         Map<SocketAddress, Breaker> ipBreaker = RpcBootstrap.getInstance().getConfiguration().getIpBreaker();
         Breaker breaker = ipBreaker.get(socketAddress);
 
@@ -43,7 +45,7 @@ public class SimpleChannelHandler extends SimpleChannelInboundHandler<RpcRespons
             RpcBootstrap.CHANNEL_CACHE.remove((InetSocketAddress) socketAddress);
             RpcRequest request = RpcRequestHolder.get();
             // 重新进行负载均衡
-            RpcBootstrap.getInstance().getLoadBalancer().reload(request.getRequestPayload().getPath(), RpcBootstrap.CHANNEL_CACHE.keySet().stream().toList());
+            RpcBootstrap.getInstance().getLoadBalanceType().reload(request.getRequestPayload().getPath(), RpcBootstrap.CHANNEL_CACHE.keySet().stream().toList());
             throw new ResponseException(code, RespCode.CLOSING.getDesc());
         } else if (code == RespCode.RATE_LIMIT.getCode()) {
             breaker.recordErrorRequest();

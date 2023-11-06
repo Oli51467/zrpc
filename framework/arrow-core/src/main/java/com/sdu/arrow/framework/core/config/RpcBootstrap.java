@@ -1,7 +1,7 @@
 package com.sdu.arrow.framework.core.config;
 
 import com.sdu.arrow.framework.common.enums.CompressionType;
-import com.sdu.arrow.framework.common.enums.LoadBalancerType;
+import com.sdu.arrow.framework.common.enums.LoadBalanceType;
 import com.sdu.arrow.framework.common.enums.SerializationType;
 import com.sdu.arrow.framework.common.util.IdGenerator;
 import com.sdu.arrow.framework.core.compressor.CompressorFactory;
@@ -9,8 +9,8 @@ import com.sdu.arrow.framework.core.handler.inbound.HttpHeadersHandler;
 import com.sdu.arrow.framework.core.handler.inbound.MethodInvokeHandler;
 import com.sdu.arrow.framework.core.handler.inbound.RequestMessageDecoder;
 import com.sdu.arrow.framework.core.handler.outbound.ResponseMessageEncoder;
-import com.sdu.arrow.framework.core.loadbalancer.LoadBalancer;
-import com.sdu.arrow.framework.core.loadbalancer.LoadBalancerFactory;
+import com.sdu.arrow.framework.core.loadbalance.LoadBalance;
+import com.sdu.arrow.framework.core.loadbalance.LoadBalanceFactory;
 import com.sdu.arrow.framework.core.netty.NettyShutdownHook;
 import com.sdu.arrow.framework.core.registry.Registry;
 import com.sdu.arrow.framework.core.serializer.SerializerFactory;
@@ -66,8 +66,8 @@ public class RpcBootstrap {
         return getConfiguration().getRegistryConfig().getRegistry();
     }
 
-    public LoadBalancer getLoadBalancer() {
-        return LoadBalancerFactory.getLoadbalancer(getConfiguration().getLoadBalancer()).getImpl();
+    public LoadBalance getLoadBalanceType() {
+        return LoadBalanceFactory.getLoadBalanceStrategy(getConfiguration().getLoadBalanceType()).getImpl();
     }
 
     public Byte getSerializer() {
@@ -123,12 +123,12 @@ public class RpcBootstrap {
     /**
      * 配置服务的负载均衡器
      *
-     * @param loadBalancerType 负载均衡器类型
+     * @param loadBalanceType 负载均衡器类型
      * @return this当前实例
      */
-    public RpcBootstrap loadbalancer(LoadBalancerType loadBalancerType) {
-        configuration.setLoadBalancer(loadBalancerType);
-        log.info("当前工程使用了【{}】进行负载均衡", loadBalancerType);
+    public RpcBootstrap loadBalance(LoadBalanceType loadBalanceType) {
+        configuration.setLoadBalanceType(loadBalanceType);
+        log.info("当前工程使用了【{}】进行负载均衡", loadBalanceType);
         return this;
     }
 

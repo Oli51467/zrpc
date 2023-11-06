@@ -27,6 +27,8 @@
         <module>spring-demo/spring-provider</module>
         <module>middleware</module>
         <module>middleware/rate-limiter</module>
+        <module>middleware/delayer</module>
+        <module>middleware/middleware-common</module>
     </modules>
 
     <properties>

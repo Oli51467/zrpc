@@ -16,17 +16,18 @@ public class SerializerFactory {
     private final static ConcurrentHashMap<Byte, ObjectWrapper<Serializer>> SERIALIZER_CODE_CACHE = new ConcurrentHashMap<>(8);
 
     static {
-        ObjectWrapper<Serializer> jdk = new ObjectWrapper<>((byte) 1, SerializationType.JDK.name(), new JdkSerializer());
-        ObjectWrapper<Serializer> json = new ObjectWrapper<>((byte) 2, SerializationType.JSON.name(), new JsonSerializer());
-        ObjectWrapper<Serializer> hessian = new ObjectWrapper<>((byte) 3, SerializationType.HESSIAN.name(), new HessianSerializer());
-        SERIALIZER_CACHE.put(SerializationType.JDK, jdk);
-        SERIALIZER_CACHE.put(SerializationType.JSON, json);
-        SERIALIZER_CACHE.put(SerializationType.HESSIAN, hessian);
+        ObjectWrapper<Serializer>[] serializers = new ObjectWrapper[]{
+                new ObjectWrapper<>((byte) 1, SerializationType.JDK.name(), new JdkSerializer()),
+                new ObjectWrapper<>((byte) 2, SerializationType.JSON.name(), new JsonSerializer()),
+                new ObjectWrapper<>((byte) 3, SerializationType.HESSIAN.name(), new HessianSerializer())
+        };
 
-        SERIALIZER_CODE_CACHE.put((byte) 1, jdk);
-        SERIALIZER_CODE_CACHE.put((byte) 2, json);
-        SERIALIZER_CODE_CACHE.put((byte) 3, hessian);
+        for (ObjectWrapper<Serializer> serializer : serializers) {
+            SERIALIZER_CACHE.put(SerializationType.valueOf(serializer.getName()), serializer);
+            SERIALIZER_CODE_CACHE.put(serializer.getCode(), serializer);
+        }
     }
+
 
     /**
      * 使用工厂方法获取一个SerializerWrapper

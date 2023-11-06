@@ -78,7 +78,7 @@ public class ZooKeeperRegistry extends AbstractRegistry {
             return new InetSocketAddress(ip, port);
         }).toList();
 
-        if (inetSocketAddresses.size() == 0) {
+        if (inetSocketAddresses.isEmpty()) {
             throw new DiscoveryException("未发现可用的服务主机");
         }
         return inetSocketAddresses;

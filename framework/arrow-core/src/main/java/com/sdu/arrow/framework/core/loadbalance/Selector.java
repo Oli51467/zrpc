@@ -1,4 +1,4 @@
-package com.sdu.arrow.framework.core.loadbalancer;
+package com.sdu.arrow.framework.core.loadbalance;
 
 import java.net.InetSocketAddress;
 

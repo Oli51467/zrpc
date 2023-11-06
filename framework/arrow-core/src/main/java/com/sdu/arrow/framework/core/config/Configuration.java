@@ -2,7 +2,7 @@ package com.sdu.arrow.framework.core.config;
 
 import com.sdu.arrow.framework.common.constant.DefaultBoostrapConfig;
 import com.sdu.arrow.framework.common.enums.CompressionType;
-import com.sdu.arrow.framework.common.enums.LoadBalancerType;
+import com.sdu.arrow.framework.common.enums.LoadBalanceType;
 import com.sdu.arrow.framework.common.enums.SerializationType;
 import com.sdu.arrow.framework.common.util.IdGenerator;
 import com.sdu.arrow.framework.core.protection.Breaker;
@@ -28,7 +28,7 @@ public class Configuration implements DefaultBoostrapConfig {
 
     private IdGenerator idGenerator = new IdGenerator(1, 2);
 
-    private LoadBalancerType loadBalancer = LoadBalancerType.ROUND_ROBIN;
+    private LoadBalanceType loadBalanceType = LoadBalanceType.ROUND_ROBIN;
 
     // 为每一个ip配置一个限流器和熔断器
     private final Map<SocketAddress, Limiter> ipRateLimiter = new ConcurrentHashMap<>(16);

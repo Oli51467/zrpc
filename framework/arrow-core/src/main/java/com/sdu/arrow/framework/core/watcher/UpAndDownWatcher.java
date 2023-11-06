@@ -47,7 +47,7 @@ public class UpAndDownWatcher implements Watcher {
                 }
             }
             // 重新负载均衡
-            RpcBootstrap.getInstance().getLoadBalancer().reload(pathName, addressList);
+            RpcBootstrap.getInstance().getLoadBalanceType().reload(pathName, addressList);
         }
     }
 }

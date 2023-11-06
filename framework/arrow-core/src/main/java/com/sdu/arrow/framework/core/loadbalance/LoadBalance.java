@@ -1,4 +1,4 @@
-package com.sdu.arrow.framework.core.loadbalancer;
+package com.sdu.arrow.framework.core.loadbalance;
 
 import java.net.InetSocketAddress;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * 负载均衡器的接口
  */
-public interface LoadBalancer {
+public interface LoadBalance {
 
     /**
      * 根据服务名获取一个可用的服务

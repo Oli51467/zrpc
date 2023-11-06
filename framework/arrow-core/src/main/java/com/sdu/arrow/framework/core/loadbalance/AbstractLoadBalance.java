@@ -1,4 +1,4 @@
-package com.sdu.arrow.framework.core.loadbalancer;
+package com.sdu.arrow.framework.core.loadbalance;
 
 import com.sdu.arrow.framework.core.config.RpcBootstrap;
 
@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public abstract class AbstractLoadBalancer implements LoadBalancer {
+public abstract class AbstractLoadBalance implements LoadBalance {
 
     // 一个服务路径会匹配一个selector
     private Map<String, Selector> selectorCache = new ConcurrentHashMap<>(8);
