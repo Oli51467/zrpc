@@ -1,7 +1,7 @@
 package com.sdu.arrow.framework.core.proxy;
 
-import com.sdu.arrow.framework.common.annotation.RpcClient;
 import com.sdu.arrow.framework.common.annotation.RpcProxy;
+import com.sdu.arrow.framework.common.annotation.RpcService;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.annotation.Order;
@@ -24,9 +24,9 @@ public class ProxyBeanPostProcessor implements BeanPostProcessor {
             if (null != annotation) {
                 // 获取一个代理
                 Class<?> clazz = field.getType();
-                // 根据这个类获取@RpcClient注解和对应的属性
-                RpcClient clientAnnotation = clazz.getAnnotation(RpcClient.class);
-                // 代理类必须持有@RpcClient注解
+                // 根据这个类获取@RpcService注解和对应的属性
+                RpcService clientAnnotation = clazz.getAnnotation(RpcService.class);
+                // 代理类必须持有@RpcService注解
                 if (null != clientAnnotation) {
                     // 从注解中获得方法提供方的应用名和路径
                     String application = clientAnnotation.application();

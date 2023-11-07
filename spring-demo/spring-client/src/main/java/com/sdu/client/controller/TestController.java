@@ -1,6 +1,6 @@
 package com.sdu.client.controller;
 
-import com.sdu.client.rpc.ArrowRpcClient;
+import com.sdu.arrow.api.GreetApi;
 import com.sdu.arrow.framework.common.annotation.RpcProxy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestController {
 
     @RpcProxy
-    public ArrowRpcClient client;
+    public GreetApi client;
 
     @RequestMapping(value = "/echo", method = RequestMethod.GET)
     public String greet() {

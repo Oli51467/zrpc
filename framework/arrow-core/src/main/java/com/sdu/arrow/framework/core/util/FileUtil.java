@@ -65,14 +65,15 @@ public class FileUtil {
                     } catch (ClassNotFoundException e) {
                         throw new RuntimeException(e);
                     }
-                }).filter(clazz -> {
-                    if (clazz.getAnnotation(RpcService.class) != null) {
-                        String path = clazz.getAnnotation(RpcService.class).path();
-                        return checkPath(path);
-                    } else {
-                        return false;
-                    }
                 })
+//                .filter(clazz -> {
+//                    if (clazz.getAnnotation(RpcService.class) != null) {
+//                        String path = clazz.getAnnotation(RpcService.class).path();
+//                        return checkPath(path);
+//                    } else {
+//                        return false;
+//                    }
+//                })
                 .collect(Collectors.toList());
     }
 
@@ -80,30 +81,37 @@ public class FileUtil {
         List<ServiceConfig> serviceConfigList = new ArrayList<>();
         for (Class<?> clazz : classes) {
             // 获取接口
-            RpcService serviceAnnotation = clazz.getAnnotation(RpcService.class);
-            String parentPath = serviceAnnotation.path();
-            String applicationName = serviceAnnotation.application();
-            Object instance;
-            try {
-                instance = clazz.getConstructor().newInstance();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            Method[] methods = clazz.getDeclaredMethods();
-            for (Method method : methods) {
-                if (method.getAnnotation(RpcMapping.class) != null) {
-                    RpcMapping mappingAnnotation = method.getAnnotation(RpcMapping.class);
-                    String path = parentPath + mappingAnnotation.path();
-                    if (!checkPath(path)) {
-                        continue;
+            Class<?>[] interfaces = clazz.getInterfaces();
+            for (Class<?> anInterface : interfaces) {
+                if (anInterface.isAnnotationPresent(RpcService.class)) {
+                    RpcService serviceAnnotation = anInterface.getAnnotation(RpcService.class);
+                    if (serviceAnnotation == null) continue;
+                    String parentPath = serviceAnnotation.path();
+                    if (!checkPath(parentPath)) continue;
+                    String applicationName = serviceAnnotation.application();
+                    Method[] methods = anInterface.getDeclaredMethods();
+                    Object instance;
+                    try {
+                        instance = clazz.getConstructor().newInstance();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
                     }
-                    path = processPath(path);
-                    ServiceConfig serviceConfig = new ServiceConfig();
-                    serviceConfig.setPath(path);
-                    serviceConfig.setReference(instance);
-                    serviceConfig.setMethod(method);
-                    serviceConfig.setApplicationName(applicationName);
-                    serviceConfigList.add(serviceConfig);
+                    for (Method method : methods) {
+                        if (method.getAnnotation(RpcMapping.class) != null) {
+                            RpcMapping mappingAnnotation = method.getAnnotation(RpcMapping.class);
+                            String path = parentPath + mappingAnnotation.path();
+                            if (!checkPath(path)) {
+                                continue;
+                            }
+                            path = processPath(path);
+                            ServiceConfig serviceConfig = new ServiceConfig();
+                            serviceConfig.setPath(path);
+                            serviceConfig.setReference(instance);
+                            serviceConfig.setMethod(method);
+                            serviceConfig.setApplicationName(applicationName);
+                            serviceConfigList.add(serviceConfig);
+                        }
+                    }
                 }
             }
         }

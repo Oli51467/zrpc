@@ -1,17 +1,15 @@
 package com.sdu.provider.impl;
 
-import com.sdu.arrow.framework.common.annotation.RpcMapping;
-import com.sdu.arrow.framework.common.annotation.RpcService;
+import com.sdu.arrow.api.GreetApi;
 
-@RpcService(application = "p1", path = "/test")
-public class GreetImpl {
+public class GreetImpl implements GreetApi {
 
-    @RpcMapping(path = "/echo")
+    @Override
     public String greet(String message) {
         return "Server echo greeting!";
     }
 
-    @RpcMapping(path = "/cal")
+    @Override
     public String cal(int a, int b) {
         int c = a + b;
         return "Result: " + c;

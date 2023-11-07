@@ -1,11 +1,10 @@
-package com.sdu.client.rpc;
+package com.sdu.arrow.api;
 
-import com.sdu.arrow.framework.common.annotation.RpcClient;
 import com.sdu.arrow.framework.common.annotation.RpcMapping;
+import com.sdu.arrow.framework.common.annotation.RpcService;
 
-@RpcClient(application = "p1", path = "/test")
-public interface ArrowRpcClient {
-
+@RpcService(application = "p1", path = "/test")
+public interface GreetApi {
     @RpcMapping(path = "/echo")
     String greet(String message);
 
