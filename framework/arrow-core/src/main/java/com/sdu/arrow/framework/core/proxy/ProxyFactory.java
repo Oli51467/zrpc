@@ -11,7 +11,7 @@ public class ProxyFactory {
 
     private static final Map<Class<?>, Object> cache = new ConcurrentHashMap<>(32);
 
-    public static <T> T getProxy(Class<T> clazz, String application, String path) {
+    public static <T> T getProxy(Class<T> clazz, String application) {
         Object bean = cache.get(clazz);
         if (null != bean) {
             return (T) bean;
@@ -20,7 +20,6 @@ public class ProxyFactory {
         ReferenceConfig<T> reference = new ReferenceConfig<>();
         reference.setTargetInterface(clazz);
         reference.setAppName(application);
-        reference.setPath(path);
 
         RpcBootstrap.getInstance().serialize(SerializationType.HESSIAN);
         T t = reference.get();

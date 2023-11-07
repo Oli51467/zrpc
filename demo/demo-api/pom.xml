@@ -5,20 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.sdu</groupId>
-        <artifactId>arrow-rpc</artifactId>
+        <artifactId>demo</artifactId>
         <version>1.0</version>
     </parent>
 
+    <artifactId>demo-api</artifactId>
     <version>1.0</version>
-    <name>spring-demo</name>
-    <description>spring-demo</description>
-    <modules>
-        <module>arrow-api</module>
-        <module>spring-client</module>
-        <module>spring-provider</module>
-    </modules>
-    <artifactId>spring-demo</artifactId>
-    <packaging>pom</packaging>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>

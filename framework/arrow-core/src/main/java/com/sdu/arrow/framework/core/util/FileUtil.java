@@ -1,7 +1,6 @@
 package com.sdu.arrow.framework.core.util;
 
-import com.sdu.arrow.framework.common.annotation.RpcMapping;
-import com.sdu.arrow.framework.common.annotation.RpcService;
+import com.sdu.arrow.framework.common.annotation.ArrowService;
 import com.sdu.arrow.framework.core.config.ServiceConfig;
 import lombok.extern.slf4j.Slf4j;
 
@@ -12,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.sdu.arrow.framework.common.constant.Constants.PATH_REGEX;
+import static cn.hutool.core.text.CharPool.DOT;
 
 @Slf4j
 public class FileUtil {
@@ -66,14 +65,7 @@ public class FileUtil {
                         throw new RuntimeException(e);
                     }
                 })
-//                .filter(clazz -> {
-//                    if (clazz.getAnnotation(RpcService.class) != null) {
-//                        String path = clazz.getAnnotation(RpcService.class).path();
-//                        return checkPath(path);
-//                    } else {
-//                        return false;
-//                    }
-//                })
+                .filter(clazz -> clazz.getAnnotation(ArrowService.class) != null)
                 .collect(Collectors.toList());
     }
 
@@ -82,73 +74,26 @@ public class FileUtil {
         for (Class<?> clazz : classes) {
             // 获取接口
             Class<?>[] interfaces = clazz.getInterfaces();
+            Object instance;
+            try {
+                instance = clazz.getConstructor().newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            ArrowService arrowService = clazz.getAnnotation(ArrowService.class);
+            String application = arrowService.application();
             for (Class<?> anInterface : interfaces) {
-                if (anInterface.isAnnotationPresent(RpcService.class)) {
-                    RpcService serviceAnnotation = anInterface.getAnnotation(RpcService.class);
-                    if (serviceAnnotation == null) continue;
-                    String parentPath = serviceAnnotation.path();
-                    if (!checkPath(parentPath)) continue;
-                    String applicationName = serviceAnnotation.application();
-                    Method[] methods = anInterface.getDeclaredMethods();
-                    Object instance;
-                    try {
-                        instance = clazz.getConstructor().newInstance();
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                    for (Method method : methods) {
-                        if (method.getAnnotation(RpcMapping.class) != null) {
-                            RpcMapping mappingAnnotation = method.getAnnotation(RpcMapping.class);
-                            String path = parentPath + mappingAnnotation.path();
-                            if (!checkPath(path)) {
-                                continue;
-                            }
-                            path = processPath(path);
-                            ServiceConfig serviceConfig = new ServiceConfig();
-                            serviceConfig.setPath(path);
-                            serviceConfig.setReference(instance);
-                            serviceConfig.setMethod(method);
-                            serviceConfig.setApplicationName(applicationName);
-                            serviceConfigList.add(serviceConfig);
-                        }
-                    }
+                Method[] methods = anInterface.getDeclaredMethods();
+                for (Method method : methods) {
+                    ServiceConfig serviceConfig = new ServiceConfig();
+                    serviceConfig.setPath(anInterface.getName() + DOT + method.getName());
+                    serviceConfig.setReference(instance);
+                    serviceConfig.setMethod(method);
+                    serviceConfig.setApplicationName(application);
+                    serviceConfigList.add(serviceConfig);
                 }
             }
         }
         return serviceConfigList;
-    }
-
-    /**
-     * 检查路径是否合法 只能包含字母、数字和"/"
-     * @param path 路径
-     * @return 合法 true 非法 false
-     */
-    public static boolean checkPath(String path) {
-        if (!path.matches(PATH_REGEX)) {
-            return false;
-        }
-        // 检查字符串的任意连续两个字符是否都不是 "/"
-        for (int i = 0; i < path.length() - 1; i++) {
-            if (path.charAt(i) == '/' && path.charAt(i + 1) == '/') {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * 处理路径 将/换成.，将前导.和后缀.去除
-     * @param path 路径
-     * @return 处理后的路径
-     */
-    public static String processPath(String path) {
-        path = path.replace("/", ".");
-        if (path.startsWith(".")) {
-            path = path.substring(1);
-        }
-        if (path.endsWith(".")) {
-            path = path.substring(0, path.length() - 1);
-        }
-        return path;
     }
 }

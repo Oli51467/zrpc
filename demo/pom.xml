@@ -10,15 +10,16 @@
     </parent>
 
     <version>1.0</version>
-    <name>spring-demo</name>
-    <description>spring-demo</description>
-    <modules>
-        <module>arrow-api</module>
-        <module>spring-client</module>
-        <module>spring-provider</module>
-    </modules>
-    <artifactId>spring-demo</artifactId>
+    <name>project-demo</name>
+    <description>project-demo</description>
     <packaging>pom</packaging>
+    <modules>
+        <module>client</module>
+        <module>provider</module>
+        <module>demo-api</module>
+    </modules>
+
+    <artifactId>demo</artifactId>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>

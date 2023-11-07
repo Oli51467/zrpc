@@ -16,13 +16,12 @@ import java.lang.reflect.Proxy;
 public class ReferenceConfig<T> {
 
     private Class<T> targetInterface;
-    private String path;
-    private String appName;
+    private String appName = "default";
 
     public T get() {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         Class<?>[] classes = new Class[]{targetInterface};
-        InvocationHandler handler = new RpcClientInvocationHandler(appName, path);
+        InvocationHandler handler = new RpcClientInvocationHandler(appName);
 
         Object helloProxy = Proxy.newProxyInstance(classLoader, classes, handler);
         return (T) helloProxy;

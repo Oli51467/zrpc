@@ -1,12 +1,10 @@
 package com.sdu.arrow.framework.core.proxy;
 
-import com.sdu.arrow.framework.common.annotation.RpcMapping;
 import com.sdu.arrow.framework.common.entity.rpc.RequestPayload;
 import com.sdu.arrow.framework.common.entity.rpc.RpcRequest;
 import com.sdu.arrow.framework.common.entity.rpc.RpcRequestHolder;
 import com.sdu.arrow.framework.common.enums.RequestType;
 import com.sdu.arrow.framework.common.exception.DiscoveryException;
-import com.sdu.arrow.framework.common.exception.InvalidRpcMappingException;
 import com.sdu.arrow.framework.common.exception.MethodExecutionException;
 import com.sdu.arrow.framework.common.exception.NetworkException;
 import com.sdu.arrow.framework.core.config.RpcBootstrap;
@@ -27,39 +25,23 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static com.sdu.arrow.framework.core.util.FileUtil.checkPath;
-import static com.sdu.arrow.framework.core.util.FileUtil.processPath;
+import static cn.hutool.core.text.CharPool.DOT;
 
 @Slf4j
 public class RpcClientInvocationHandler implements InvocationHandler {
 
     private final String appName;
-    private final String path;
 
-    public RpcClientInvocationHandler(String appName, String path) {
+    public RpcClientInvocationHandler(String appName) {
         this.appName = appName;
-        this.path = path;
     }
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) {
-        RpcMapping mappingAnnotation = method.getAnnotation(RpcMapping.class);
-        if (null == mappingAnnotation) {
-            log.error("远程调用缺少Path字段或缺少映射注解, method: {}", method.getName());
-            throw new InvalidRpcMappingException();
-        }
-        String childPath = mappingAnnotation.path();
-        String tempPath = new String(path);
-        tempPath = tempPath.concat(childPath);
-        if (!checkPath(tempPath)) {
-            log.error("远程调用Path字段非法, path: {}", tempPath);
-            throw new InvalidRpcMappingException();
-        }
-        // 对路径的特殊字符做处理
-        tempPath = processPath(tempPath);
         // 1.寻找该服务的可用节点，通过客户端负载均衡寻找一个可用的服务。如果找不到会抛出一个异常
-        InetSocketAddress address = RpcBootstrap.getInstance().getLoadBalanceType().selectService(appName, tempPath);
-        log.info("发现服务【{}】的提供者: {}", tempPath, address);
+        String path = method.getDeclaringClass().getName() + DOT + method.getName();
+        InetSocketAddress address = RpcBootstrap.getInstance().getLoadBalanceType().selectService(appName, path);
+        log.info("发现服务【{}】的提供者: {}", path, address);
         // 2.判断服务的熔断器是否是打开状态
         Map<SocketAddress, Breaker> ipBreaker = RpcBootstrap.getInstance().getConfiguration().getIpBreaker();
         Breaker breaker = ipBreaker.get(address);
@@ -73,7 +55,7 @@ public class RpcClientInvocationHandler implements InvocationHandler {
         Channel channel = getChannel(address);
         // 5.如果所有连接都拿到了，开始封装报文
         RequestPayload requestPayload = RequestPayload.builder()
-                .path(tempPath)
+                .path(path)
                 .methodName(method.getName())
                 .parametersType(method.getParameterTypes())
                 .parametersValue(args)
