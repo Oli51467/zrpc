@@ -6,6 +6,7 @@ import lombok.Getter;
 public enum RespCode {
 
     SUCCESS((byte) 20, "成功"),
+    HEARTBEAT((byte) 21, "心跳检测成功返回"),
     RATE_LIMIT((byte) 31, "服务被限流"),
     RESOURCE_NOT_FOUND((byte) 44, "请求的资源不存在"),
     FAIL((byte) 50, "调用方法发生异常"),

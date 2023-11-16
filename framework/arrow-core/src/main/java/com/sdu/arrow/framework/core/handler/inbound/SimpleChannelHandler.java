@@ -29,7 +29,11 @@ public class SimpleChannelHandler extends SimpleChannelInboundHandler<RpcRespons
         Breaker breaker = ipBreaker.get(socketAddress);
 
         Byte code = response.getCode();
-        if (code == RespCode.SUCCESS.getCode()) {
+        if (code == RespCode.HEARTBEAT.getCode()) {
+            completableFuture.complete(null);
+            RpcBootstrap.PENDING_REQUEST.remove(response.getRequestId());
+            log.info("Heartbeat signal");
+        } else if (code == RespCode.SUCCESS.getCode()) {
             Object responseBody = response.getBody();
             completableFuture.complete(responseBody);
             log.info("Id为【{}】的处理响应结果。", response.getRequestId());

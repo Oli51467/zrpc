@@ -22,8 +22,7 @@ public class ReferenceConfig<T> {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         Class<?>[] classes = new Class[]{targetInterface};
         InvocationHandler handler = new RpcClientInvocationHandler(appName);
-
-        Object helloProxy = Proxy.newProxyInstance(classLoader, classes, handler);
-        return (T) helloProxy;
+        Object remoteProcessCallProxy = Proxy.newProxyInstance(classLoader, classes, handler);
+        return (T) remoteProcessCallProxy;
     }
 }

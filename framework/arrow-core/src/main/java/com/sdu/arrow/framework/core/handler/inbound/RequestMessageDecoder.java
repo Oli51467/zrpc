@@ -3,6 +3,7 @@ package com.sdu.arrow.framework.core.handler.inbound;
 import com.sdu.arrow.framework.common.constant.RpcMessageConstant;
 import com.sdu.arrow.framework.common.entity.rpc.RequestPayload;
 import com.sdu.arrow.framework.common.entity.rpc.RpcRequest;
+import com.sdu.arrow.framework.common.enums.RequestType;
 import com.sdu.arrow.framework.common.exception.ProtocolException;
 import com.sdu.arrow.framework.core.compressor.Compressor;
 import com.sdu.arrow.framework.core.compressor.CompressorFactory;
@@ -82,6 +83,10 @@ public class RequestMessageDecoder extends LengthFieldBasedFrameDecoder implemen
         request.setCompressionType(compressionType);
         request.setSerializationType(serializationType);
         request.setTimeStamp(timeStamp);
+        // 心跳请求不处理
+        if (requestType == RequestType.HEART_BEAT.getCode()) {
+            return request;
+        }
         int payloadLength = fullLength - headerLength;
         byte[] payload = new byte[payloadLength];
         byteBuf.readBytes(payload);

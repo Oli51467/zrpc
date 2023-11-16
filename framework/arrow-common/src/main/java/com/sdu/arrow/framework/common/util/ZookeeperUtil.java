@@ -49,18 +49,15 @@ public class ZookeeperUtil {
      * @param node       节点
      * @param watcher    watcher实例
      * @param createMode 节点的类型
-     * @return true: 成功创建  false: 已经存在  异常：抛出
      */
-    public static Boolean createNode(ZooKeeper zooKeeper, ZooKeeperNode node, Watcher watcher, CreateMode createMode) {
+    public static void createNode(ZooKeeper zooKeeper, ZooKeeperNode node, Watcher watcher, CreateMode createMode) {
         try {
             // 判断节点是否存在
             if (zooKeeper.exists(node.getNodePath(), watcher) == null) {
                 String result = zooKeeper.create(node.getNodePath(), node.getData(), ZooDefs.Ids.OPEN_ACL_UNSAFE, createMode);
                 log.info("节点【{}】，成功创建。", result);
-                return true;
             } else {
                 log.info("节点【{}】已经存在，无需创建。", node.getNodePath());
-                return false;
             }
         } catch (KeeperException | InterruptedException e) {
             log.error("创建基础目录时发生异常：", e);
@@ -73,6 +70,14 @@ public class ZookeeperUtil {
             if (zooKeeper.exists(path, watcher) != null) {
                 zooKeeper.delete(path, version);
             }
+        } catch (InterruptedException | KeeperException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void setData(ZooKeeper zooKeeper, String path, String data) {
+        try {
+            zooKeeper.setData(path, data.getBytes(), -1);
         } catch (InterruptedException | KeeperException e) {
             throw new RuntimeException(e);
         }

@@ -13,6 +13,7 @@ import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.ZooKeeper;
 
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static com.sdu.arrow.framework.common.constant.ZooKeeperConstant.getPath;
@@ -38,21 +39,22 @@ public class ZooKeeperRegistry extends AbstractRegistry {
         String applicationNode = getProviderNodePath(service.getApplicationName());
         // 创建父节点(应用节点)
         if (!ZookeeperUtil.exists(zooKeeper, applicationNode, null)) {
-            ZooKeeperNode node = new ZooKeeperNode(applicationNode, null);
+            ZooKeeperNode node = new ZooKeeperNode(applicationNode, applicationNode.getBytes(StandardCharsets.UTF_8));
             ZookeeperUtil.createNode(zooKeeper, node, null, CreateMode.PERSISTENT);
             log.info("应用节点创建");
         }
-        String pathNode = getPath(applicationNode, service.getPath());
+        String nodePath = getPath(applicationNode, service.getPath());
         // 创建父节点(路径节点)
-        if (!ZookeeperUtil.exists(zooKeeper, pathNode, null)) {
-            ZooKeeperNode node = new ZooKeeperNode(pathNode, null);
+        if (!ZookeeperUtil.exists(zooKeeper, nodePath, null)) {
+            ZooKeeperNode node = new ZooKeeperNode(nodePath, nodePath.getBytes(StandardCharsets.UTF_8));
             ZookeeperUtil.createNode(zooKeeper, node, null, CreateMode.PERSISTENT);
-            log.info("方法节点创建");
+            log.info("路径节点创建");
         }
         // 创建临时本机节点(ip节点)
-        String finalNodePath = getPath(pathNode, NetUtil.getIp(RpcBootstrap.getInstance().getConfiguration().getPort()));
+        String remoteIp = NetUtil.getIp(RpcBootstrap.getInstance().getConfiguration().getPort());
+        String finalNodePath = getPath(nodePath, remoteIp);
         if (!ZookeeperUtil.exists(zooKeeper, finalNodePath, null)) {
-            ZooKeeperNode node = new ZooKeeperNode(finalNodePath, null);
+            ZooKeeperNode node = new ZooKeeperNode(finalNodePath, remoteIp.getBytes(StandardCharsets.UTF_8));
             ZookeeperUtil.createNode(zooKeeper, node, null, CreateMode.EPHEMERAL);
             log.info("ip节点创建");
         }

@@ -4,6 +4,7 @@ import com.sdu.arrow.framework.common.entity.holder.ShutdownContextHolder;
 import com.sdu.arrow.framework.common.entity.rpc.RequestPayload;
 import com.sdu.arrow.framework.common.entity.rpc.RpcRequest;
 import com.sdu.arrow.framework.common.entity.rpc.RpcResponse;
+import com.sdu.arrow.framework.common.enums.RequestType;
 import com.sdu.arrow.framework.common.enums.RespCode;
 import com.sdu.arrow.framework.common.exception.MethodExecutionException;
 import com.sdu.arrow.framework.common.transaction.annotation.SecureInvoke;
@@ -39,6 +40,12 @@ public class MethodInvokeHandler extends SimpleChannelInboundHandler<RpcRequest>
         // 查看关闭的挡板是否打开，如果挡板已经打开，返回一个错误的响应
         if (ShutdownContextHolder.BAFFLE.get()) {
             response.setCode(RespCode.CLOSING.getCode());
+            channel.writeAndFlush(response);
+            return;
+        }
+        if (request.getRequestType() == RequestType.HEART_BEAT.getCode()) {
+            response.setCode(RespCode.HEARTBEAT.getCode());
+            response.setTimeStamp(System.currentTimeMillis());
             channel.writeAndFlush(response);
             return;
         }
