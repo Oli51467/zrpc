@@ -9,7 +9,7 @@
 ## 在Springboot中集成Zrpc
 - 启动Zookeeper 默认端口为2181
 ```shell
-cd ZOOKEEPER_ROOT_PATH
+cd $ZOOKEEPER_ROOT_PATH
 bin/zkServer.sh start
 ```
 - 运行manager模块下的ManagerApplication在zookeeper下创建基础持久节点。
@@ -40,7 +40,7 @@ bin/zkServer.sh start
 - 使用@EnableZrpc注解开启Rpc远程调用，basePackages为接口实现所在的包
 ```java
 @SpringBootApplication
-@ComponentScan("com.sdu")
+@ComponentScan("com.sdu.zrpc")
 @EnableZrpc(basePackages = "com.sdu.provider.impl")
 public class SpringProviderApplication {
 
@@ -50,34 +50,34 @@ public class SpringProviderApplication {
 }
 ```
 
-- 在接口实现类上使用@RpcService声明这是一个远程调用服务。
+- 在接口实现类上使用@ZrpcService声明这是一个远程调用服务。
 
 可以添加参数application指定服务的应用名和该类接口的根路径path。
 
 在每一个接口的实现上，使用@RpcMapping注解声明接口的子路径，如果同一路径不可以被声明两次或多次
 ```java
-@RpcService(application = "p1", path = "/test")
-public class GreetImpl {
+@ZrpcService
+public class GreetImpl implements GreetApi {
 
-    @RpcMapping(path = "/echo")
+    @Override
     public String greet(String message) {
         return "Server echo greeting!";
     }
 
-    @RpcMapping(path = "/cal")
+    @Override
     public String cal(int a, int b) {
         int c = a + b;
         return "Result: " + c;
     }
 }
 ```
-此时，GreetImpl下的greet方法会被注册到Zookeeper到临时节点上，路径为/zrpc-metadata/providers/p1/test.echo/xxx.xxx.xxx.xxx:${PORT}
-此时，GreetImpl下的cal方法会被注册到Zookeeper到临时节点上，路径为/zrpc-metadata/providers/p1/test.cal/xxx.xxx.xxx.xxx:${PORT}
+此时，GreetImpl下的greet方法会被注册到Zookeeper到临时节点上，路径为/zrpc-metadata/providers/default/test.echo/${IP}:${PORT}
+此时，GreetImpl下的cal方法会被注册到Zookeeper到临时节点上，路径为/zrpc-metadata/providers/default/test.cal/${IP}:${PORT}
 
 ### 客户端
 - 启动Zookeeper 默认端口为2181
 ```shell
-cd ZOOKEEPER_ROOT_PATH
+cd $ZOOKEEPER_ROOT_PATH
 bin/zkServer.sh start
 ```
 - 在启动类加上@EnableAspectJAutoProxy注解
@@ -92,38 +92,20 @@ public class SpringClientApplication {
 }
 ```
 
-- 创建一个接口类，比如RpcClient。
-
-在类上使用注解```@RpcClient(application = "p1", path = "/test")```
-表示在该类下声明了远程调用的应用名"p1"和调用服务的根路径"/test"。
-
-声明一个接口：greet，在该接口上使用@RpcMapping(path = "/echo")注解，表示将该方法映射到远程p1服务的/test/echo路径下。
-
-可以声明多个接口，保证每个接口的路径唯一。
-
-完整的RpcClient接口代码如下：
-```java
-@RpcClient(application = "p1", path = "/test")
-public interface RpcClient {
-
-    @RpcMapping(path = "/echo")
-    String greet(String message);
-
-    @RpcMapping(path = "/cal")
-    String cal(int a, int b);
-}
-```
-
 - 接口调用
 
-使用@RpcProxy注解声明一个Rpc客户端，调用接口的具体方法。完整代码如下：
+创建一个接口类，用于测试远程调用的入口。
+
+在要调用的接口上使用注解```@ZrpcReference```来为接口调用生成一个代理
+
+完整代码如下：
 ```java
 @RestController
 @Slf4j
 public class TestController {
 
-    @RpcProxy
-    public RpcClient client;
+    @ZrpcReference
+    public GreetApi client;
 
     @RequestMapping(value = "/echo", method = RequestMethod.GET)
     public String greet() {
@@ -131,7 +113,7 @@ public class TestController {
     }
 
     @RequestMapping(value = "/cal", method = RequestMethod.GET)
-    public String cal() {
+    public String greet1() {
         return client.cal(5, 5);
     }
 }
@@ -232,7 +214,7 @@ public class TestController {
 
 ### Header
 
-- ```Magic Number 4B```：魔数，用于识别该协议 例如：0xspar
+- ```Magic Number 4B```：魔数，用于识别该协议 例如：0xzrpc
 - ```Version 1B```：协议版本号
 - ```Header Length 4B```：Header部分的长度
 - ```Body Length 4B```：Body部分的长度

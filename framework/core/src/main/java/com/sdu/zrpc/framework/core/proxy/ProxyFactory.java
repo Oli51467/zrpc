@@ -1,6 +1,5 @@
 package com.sdu.zrpc.framework.core.proxy;
 
-import com.sdu.zrpc.framework.common.enums.SerializationType;
 import com.sdu.zrpc.framework.core.config.ReferenceConfig;
 
 import java.util.Map;
