@@ -4,13 +4,12 @@ import com.sdu.zrpc.framework.common.entity.ObjectWrapper;
 import com.sdu.zrpc.framework.common.exception.SpiException;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,17 +27,26 @@ public class SpiHandler {
 
     static {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        URL fileURL = classLoader.getResource(SPI_BASE_PATH);
-        if (null != fileURL) {
-            File file = new File(fileURL.getPath());
-            File[] chileFiles = file.listFiles();
-            if (null != chileFiles) {
-                for (File chileFile : chileFiles) {
-                    String fileName = chileFile.getName();
-                    List<String> value = getImplNames(fileName);
-                    SPI_CONTENT.put(fileName, value);
+        Enumeration<URL> fileURL;
+        try {
+            fileURL = classLoader.getResources(SPI_BASE_PATH);
+            while (fileURL.hasMoreElements()) {
+                URL url = fileURL.nextElement();
+                String fileName = url.getPath().substring(url.getPath().lastIndexOf("/") + 1);
+                URLConnection urlConnection = url.openConnection();
+                urlConnection.setUseCaches(false);
+                InputStream inputStream = urlConnection.getInputStream();
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                String implClassName = bufferedReader.readLine();
+                List<String> value = new ArrayList<>();
+                while (null != implClassName) {
+                    value.add(implClassName);
+                    implClassName = bufferedReader.readLine();
                 }
+                SPI_CONTENT.put(fileName, value);
             }
+        } catch (IOException e) {
+            throw new SpiException("spi路径资源不存在");
         }
     }
 
@@ -48,10 +56,10 @@ public class SpiHandler {
      * @param clazz 一个服务接口的class实例
      * @return 实现类的实例
      */
-    public synchronized static <T> ObjectWrapper<T> get(Class<T> clazz) {
+    public synchronized static <T> ObjectWrapper<T> load(Class<T> clazz) {
         // 尝试从缓存中获取
         List<ObjectWrapper<?>> objectWrappers = SPI_IMPLEMENT.get(clazz);
-        if (null != objectWrappers && objectWrappers.size() > 0) {
+        if (null != objectWrappers && !objectWrappers.isEmpty()) {
             return (ObjectWrapper<T>) objectWrappers.get(0);
         }
         // 构建缓存
@@ -72,17 +80,17 @@ public class SpiHandler {
      * @param clazz 一个服务接口的class实例
      * @return 实现类的实例集合
      */
-    public synchronized static <T> List<ObjectWrapper<T>> getList(Class<T> clazz) {
+    public synchronized static <T> List<ObjectWrapper<T>> loadAll(Class<T> clazz) {
         // 尝试从缓存中获取
         List<ObjectWrapper<?>> objectWrapperList = SPI_IMPLEMENT.get(clazz);
-        if (null != objectWrapperList && objectWrapperList.size() > 0) {
+        if (null != objectWrapperList && !objectWrapperList.isEmpty()) {
             return objectWrapperList.stream().map(wrapper -> (ObjectWrapper<T>) wrapper).collect(Collectors.toList());
         }
         // 构建缓存
         buildCache(clazz);
         // 再次获取
         objectWrapperList = SPI_IMPLEMENT.get(clazz);
-        if (objectWrapperList != null && objectWrapperList.size() > 0) {
+        if (objectWrapperList != null && !objectWrapperList.isEmpty()) {
             return objectWrapperList.stream().map(wrapper -> (ObjectWrapper<T>) wrapper).collect(Collectors.toList());
         }
         return new ArrayList<>();
@@ -96,6 +104,7 @@ public class SpiHandler {
     private static <T> void buildCache(Class<T> clazz) {
         // 通过clazz获取与之匹配的实现名称
         String clazzName = clazz.getName();
+        // 获取已经初始已经缓存的实现的全类名
         List<String> implNames = SPI_CONTENT.get(clazzName);
         if (null == implNames || implNames.isEmpty()) {
             return;
@@ -112,6 +121,9 @@ public class SpiHandler {
                 String type = configs[1];
                 String implementName = configs[2];
                 Class<?> implementClass = Class.forName(implementName);
+                if (!clazz.isAssignableFrom(implementClass)) {
+                    throw new SpiException(implementName + "不是" + clazzName + "的实现");
+                }
                 Object impl = implementClass.getConstructor().newInstance();
                 ObjectWrapper<?> objectWrapper = new ObjectWrapper<>(code, type, impl);
                 impls.add(objectWrapper);
@@ -121,27 +133,5 @@ public class SpiHandler {
             }
         }
         SPI_IMPLEMENT.put(clazz, impls);
-    }
-
-    /**
-     * 获取文件所有的实现名称
-     *
-     * @param fileName 文件对象
-     * @return 实现类的权限定名称结合
-     */
-    private static List<String> getImplNames(String fileName) {
-        try (FileReader fileReader = new FileReader(fileName);
-             BufferedReader bufferedReader = new BufferedReader(fileReader)) {
-            List<String> implNames = new ArrayList<>();
-            while (true) {
-                String line = bufferedReader.readLine();
-                if (null == line || "".equals(line)) break;
-                implNames.add(line);
-            }
-            return implNames;
-        } catch (IOException e) {
-            log.error("读取spi文件时发生异常.", e);
-        }
-        return null;
     }
 }

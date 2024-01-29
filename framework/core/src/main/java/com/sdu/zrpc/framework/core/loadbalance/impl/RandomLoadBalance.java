@@ -20,7 +20,15 @@ public class RandomLoadBalance extends AbstractLoadBalance {
         return new RandomSelector(serviceList);
     }
 
-    private record RandomSelector(List<InetSocketAddress> serviceList) implements Selector {
+    private static class RandomSelector implements Selector {
+
+        private final List<InetSocketAddress> serviceList;
+        private final int serviceListSize;
+
+        private RandomSelector(List<InetSocketAddress> serviceList) {
+            this.serviceList = serviceList;
+            this.serviceListSize = serviceList.size();
+        }
 
         @Override
         public InetSocketAddress select() {
@@ -28,7 +36,7 @@ public class RandomLoadBalance extends AbstractLoadBalance {
                 log.error("进行负载均衡选取节点时发现服务列表为空.");
                 throw new LoadBalanceException();
             } else {
-                int selectPosition = ThreadLocalRandom.current().nextInt(serviceList.size());
+                int selectPosition = ThreadLocalRandom.current().nextInt(serviceListSize);
                 InetSocketAddress socketAddress = serviceList.get(selectPosition);
                 log.info("使用随机的负载均衡算法，select remote address: {}", socketAddress.getAddress().toString());
                 return socketAddress;
