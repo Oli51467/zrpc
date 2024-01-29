@@ -1,2 +1,0 @@
-1-GZIP-com.sdu.arrow.framework.core.compressor.impl.GzipCompressor
-2-DEFLATE-com.sdu.arrow.framework.core.compressor.impl.DeflateCompressor

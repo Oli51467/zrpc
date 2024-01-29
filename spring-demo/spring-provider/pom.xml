@@ -31,13 +31,13 @@
 
         <dependency>
             <groupId>com.sdu</groupId>
-            <artifactId>arrow-core</artifactId>
+            <artifactId>core</artifactId>
             <version>1.0</version>
         </dependency>
 
         <dependency>
             <groupId>com.sdu</groupId>
-            <artifactId>arrow-api</artifactId>
+            <artifactId>api</artifactId>
             <version>1.0</version>
         </dependency>
 

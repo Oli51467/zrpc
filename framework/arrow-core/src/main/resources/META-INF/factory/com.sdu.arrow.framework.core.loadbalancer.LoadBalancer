@@ -1,3 +1,0 @@
-2-CONSISTENT_HASH-com.sdu.arrow.framework.core.loadbalance.impl.ConsistentHashBalancer
-1-ROUND_ROBIN-com.sdu.arrow.framework.core.loadbalance.impl.RoundRobinLoadBalance
-3-RESPONSE_TIME-com.sdu.arrow.framework.core.loadbalance.impl.ResponseTimeLoadBalance

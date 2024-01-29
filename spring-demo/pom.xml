@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.sdu</groupId>
-        <artifactId>arrow-rpc</artifactId>
+        <artifactId>zrpc</artifactId>
         <version>1.0</version>
     </parent>
 
@@ -13,7 +13,7 @@
     <name>spring-demo</name>
     <description>spring-demo</description>
     <modules>
-        <module>arrow-api</module>
+        <module>api</module>
         <module>spring-client</module>
         <module>spring-provider</module>
     </modules>

@@ -12,19 +12,15 @@
     </parent>
 
     <groupId>com.sdu</groupId>
-    <artifactId>arrow-rpc</artifactId>
+    <artifactId>zrpc</artifactId>
     <version>1.0</version>
     <packaging>pom</packaging>
     <modules>
         <module>framework</module>
-        <module>framework/arrow-common</module>
-        <module>framework/arrow-core</module>
+        <module>framework/common</module>
+        <module>framework/core</module>
         <module>manager</module>
         <module>spring-demo</module>
-        <module>middleware</module>
-        <module>middleware/rate-limiter</module>
-        <module>middleware/delayer</module>
-        <module>middleware/middleware-common</module>
         <module>demo</module>
     </modules>
 

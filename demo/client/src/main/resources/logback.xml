@@ -91,7 +91,7 @@
     </root>
     <!--name用于指定工程项目的包名，记录该包下的日志信息-->
     <!--level指定为debug，代表只记录debug以上级别的日志-->
-    <logger name="arrow" level="${log.level}" additivity="true">
+    <logger name="zrpc" level="${log.level}" additivity="true">
         <!--跟文件相关的appender进行绑定-->
         <appender-ref ref="debugAppender"/>
         <appender-ref ref="infoAppender"/>

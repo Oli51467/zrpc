@@ -1,9 +1,9 @@
 package com.sdu.provider.impl;
 
-import com.sdu.arrow.api.GreetApi;
-import com.sdu.arrow.framework.common.annotation.ArrowService;
+import com.sdu.zrpc.api.GreetApi;
+import com.sdu.zrpc.framework.common.annotation.ZrpcService;
 
-@ArrowService
+@ZrpcService
 public class GreetImpl implements GreetApi {
 
     @Override

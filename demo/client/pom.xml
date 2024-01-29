@@ -22,7 +22,7 @@
 
         <dependency>
             <groupId>com.sdu</groupId>
-            <artifactId>arrow-core</artifactId>
+            <artifactId>core</artifactId>
             <version>1.0</version>
         </dependency>
 
