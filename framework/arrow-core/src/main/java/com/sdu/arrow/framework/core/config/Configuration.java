@@ -20,7 +20,7 @@ public class Configuration implements DefaultBoostrapConfig {
 
     private Integer port = DEFAULT_PORT;
 
-    private SerializationType serializationType = SerializationType.JDK;
+    private SerializationType serializationType = SerializationType.HESSIAN;
 
     private CompressionType compressionType = CompressionType.GZIP;
 

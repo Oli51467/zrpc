@@ -22,8 +22,8 @@ public class RoundRobinLoadBalance extends AbstractLoadBalance {
      * 如果内部类不会引用到外部类，强烈建议使用静态内部类节省资源，减少内部类其中的一个指向外部类的引用。
      */
     private static class RoundRobinSelector implements Selector {
-        private List<InetSocketAddress> serviceList;
-        private AtomicInteger index;
+        private final List<InetSocketAddress> serviceList;
+        private final AtomicInteger index;
 
         public RoundRobinSelector(List<InetSocketAddress> serviceList) {
             this.serviceList = serviceList;

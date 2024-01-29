@@ -20,7 +20,7 @@ public class SpiResolver {
      */
     public void loadFromSpi(Configuration configuration) {
 
-        // 我的spi的文件中配置了很多实现（自由定义，只能配置一个实现，还是多个）
+        // spi文件中配置了很多实现
         List<ObjectWrapper<LoadBalance>> loadBalanceObjectWrappers = SpiHandler.getList(LoadBalance.class);
         // 将其放入工厂
         if (loadBalanceObjectWrappers != null && loadBalanceObjectWrappers.size() > 0) {

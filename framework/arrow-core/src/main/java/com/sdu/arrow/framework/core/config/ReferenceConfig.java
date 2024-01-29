@@ -21,6 +21,8 @@ public class ReferenceConfig<T> {
     public T get() {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         Class<?>[] classes = new Class[]{targetInterface};
+        // InvocationHandler接口是proxy代理实例的调用处理程序实现的一个接口，
+        // 每一个proxy代理实例都有一个关联的调用处理程序；在代理实例调用方法时，方法调用被编码分派到调用处理程序的invoke方法。
         InvocationHandler handler = new RpcClientInvocationHandler(appName);
         Object remoteProcessCallProxy = Proxy.newProxyInstance(classLoader, classes, handler);
         return (T) remoteProcessCallProxy;

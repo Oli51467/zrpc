@@ -106,7 +106,7 @@ public class MethodInvokeHandler extends SimpleChannelInboundHandler<RpcRequest>
         return returnValue;
     }
 
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED, rollbackFor = Exception.class)
+    @Transactional(isolation = Isolation.REPEATABLE_READ, rollbackFor = Exception.class)
     @SecureInvoke
     public void writeAndFlushWithTransaction(Channel channel, RpcResponse response) {
         channel.writeAndFlush(response);

@@ -15,7 +15,7 @@ public abstract class AbstractLoadBalance implements LoadBalance {
     @Override
     public InetSocketAddress selectService(String appName, String path) {
         // 优先从cache中获取一个选择器
-        Selector selector = selectorCache.get(path);
+        Selector selector = selectorCache.get(appName + path);
         // 如果没有，就需要为这个service创建一个selector
         if (null == selector) {
             // 注册中心服务发现所有可用的节点
@@ -23,7 +23,7 @@ public abstract class AbstractLoadBalance implements LoadBalance {
             // 具体的选择逻辑由子类实现
             selector = initSelector(serviceList);
             // 将select放入缓存当中
-            selectorCache.put(path, selector);
+            selectorCache.put(appName + path, selector);
         }
         // 执行selector的选择逻辑选择一个节点
         return selector.select();

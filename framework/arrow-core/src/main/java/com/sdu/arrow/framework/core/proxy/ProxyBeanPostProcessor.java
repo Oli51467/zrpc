@@ -22,10 +22,12 @@ public class ProxyBeanPostProcessor implements BeanPostProcessor {
                 // 获取一个代理
                 String application = annotation.application();
                 Class<?> clazz = field.getType();
-                // 生成代理
+                // 根据接口类型和应用名称生成一个RPC代理对象
                 Object proxy = ProxyFactory.getProxy(clazz, application);
                 field.setAccessible(true);
                 try {
+                    // 将生成的RPC代理对象设置到原bean对象的相应字段中
+                    // 设置代理 使用时增强
                     field.set(bean, proxy);
                 } catch (IllegalAccessException e) {
                     throw new RuntimeException(e);

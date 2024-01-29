@@ -21,7 +21,6 @@ public class ProxyFactory {
         reference.setTargetInterface(clazz);
         reference.setAppName(application);
 
-        RpcBootstrap.getInstance().serialize(SerializationType.HESSIAN);
         T t = reference.get();
         cache.put(clazz, t);
         return t;
