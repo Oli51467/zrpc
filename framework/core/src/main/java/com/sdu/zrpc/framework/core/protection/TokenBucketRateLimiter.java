@@ -3,7 +3,7 @@ package com.sdu.zrpc.framework.core.protection;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class TokenBucketRateLimiter implements Limiter {
+public class TokenBucketRateLimiter implements RateLimiter {
 
     private int tokens;
 

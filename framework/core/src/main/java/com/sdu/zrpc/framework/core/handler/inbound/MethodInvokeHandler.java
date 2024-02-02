@@ -10,7 +10,7 @@ import com.sdu.zrpc.framework.common.exception.MethodExecutionException;
 import com.sdu.zrpc.framework.common.transaction.annotation.SecureInvoke;
 import com.sdu.zrpc.framework.core.config.RpcBootstrap;
 import com.sdu.zrpc.framework.core.config.ServiceConfig;
-import com.sdu.zrpc.framework.core.protection.Limiter;
+import com.sdu.zrpc.framework.core.protection.RateLimiter;
 import com.sdu.zrpc.framework.core.protection.TokenBucketRateLimiter;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -52,13 +52,13 @@ public class MethodInvokeHandler extends SimpleChannelInboundHandler<RpcRequest>
         ShutdownContextHolder.REQUEST_COUNTER.increment();
         // 请求限流
         SocketAddress socketAddress = channel.remoteAddress();
-        Map<SocketAddress, Limiter> ipRateLimiter = RpcBootstrap.getInstance().getConfiguration().getIpRateLimiter();
-        Limiter limiter = ipRateLimiter.get(socketAddress);
-        if (null == limiter) {
-            limiter = new TokenBucketRateLimiter(10, 1000);
-            ipRateLimiter.put(socketAddress, limiter);
+        Map<SocketAddress, RateLimiter> ipRateLimiter = RpcBootstrap.getInstance().getConfiguration().getIpRateLimiter();
+        RateLimiter rateLimiter = ipRateLimiter.get(socketAddress);
+        if (null == rateLimiter) {
+            rateLimiter = new TokenBucketRateLimiter(50, 50);
+            ipRateLimiter.put(socketAddress, rateLimiter);
         }
-        boolean allowRequest = limiter.allowRequest();
+        boolean allowRequest = rateLimiter.allowRequest();
         if (!allowRequest) {
             response.setCode(RespCode.RATE_LIMIT.getCode());
         } else {

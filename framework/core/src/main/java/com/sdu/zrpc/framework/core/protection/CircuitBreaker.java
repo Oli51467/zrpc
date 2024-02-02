@@ -69,7 +69,7 @@ public class CircuitBreaker implements Breaker {
                 attemptLocal.set(true);
                 log.info("熔断器设置为半打开状态");
             } else {
-                log.info("请求被熔断");
+                log.warn("请求被熔断");
                 throw new RuntimeException("断路器开启，无法发送请求");
             }
         }

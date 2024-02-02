@@ -1,6 +1,6 @@
 package com.sdu.zrpc.framework.core.protection;
 
-public interface Limiter {
+public interface RateLimiter {
 
     /**
      * 是否允许新的请求进入

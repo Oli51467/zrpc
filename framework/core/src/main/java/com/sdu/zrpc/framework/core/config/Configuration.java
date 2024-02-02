@@ -6,7 +6,7 @@ import com.sdu.zrpc.framework.common.enums.LoadBalanceType;
 import com.sdu.zrpc.framework.common.enums.SerializationType;
 import com.sdu.zrpc.framework.common.util.IdGenerator;
 import com.sdu.zrpc.framework.core.protection.Breaker;
-import com.sdu.zrpc.framework.core.protection.Limiter;
+import com.sdu.zrpc.framework.core.protection.RateLimiter;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,7 +31,7 @@ public class Configuration implements DefaultBoostrapConfig {
     private LoadBalanceType loadBalanceType = LoadBalanceType.ROUND_ROBIN;
 
     // 为每一个ip配置一个限流器和熔断器
-    private final Map<SocketAddress, Limiter> ipRateLimiter = new ConcurrentHashMap<>(16);
+    private final Map<SocketAddress, RateLimiter> ipRateLimiter = new ConcurrentHashMap<>(16);
     private final Map<SocketAddress, Breaker> ipBreaker = new ConcurrentHashMap<>(16);
 
     public Configuration() {

@@ -7,6 +7,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @Order(1)
@@ -21,9 +22,11 @@ public class ProxyBeanPostProcessor implements BeanPostProcessor {
             if (null != annotation) {
                 // 获取一个代理
                 String application = annotation.application();
+                int waitTime = annotation.waitTime();
+                TimeUnit waitTimeUnit = annotation.waitTimeUnit();
                 Class<?> clazz = field.getType();
                 // 根据接口类型和应用名称生成一个RPC代理对象
-                Object proxy = ProxyFactory.getProxy(clazz, application);
+                Object proxy = ProxyFactory.getProxy(clazz, application, waitTime, waitTimeUnit);
                 field.setAccessible(true);
                 try {
                     // 将生成的RPC代理对象设置到原bean对象的相应字段中
