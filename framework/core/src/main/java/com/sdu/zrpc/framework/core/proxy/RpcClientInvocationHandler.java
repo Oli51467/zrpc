@@ -7,6 +7,7 @@ import com.sdu.zrpc.framework.common.enums.RequestType;
 import com.sdu.zrpc.framework.common.exception.DiscoveryException;
 import com.sdu.zrpc.framework.common.exception.MethodExecutionException;
 import com.sdu.zrpc.framework.common.exception.NetworkException;
+import com.sdu.zrpc.framework.common.util.ExceptionUtil;
 import com.sdu.zrpc.framework.core.config.RpcBootstrap;
 import com.sdu.zrpc.framework.core.netty.NettyBoostrapInitializer;
 import com.sdu.zrpc.framework.core.protection.Breaker;
@@ -64,10 +65,7 @@ public class RpcClientInvocationHandler implements InvocationHandler {
         // 3. 尝试是否可以访问，如果不能访问则抛出异常
         breaker.attempt();
 
-        // 4. 尝试使用服务发现的地址获取一个Channel连接
-        Channel channel = getChannel(address);
-
-        // 5. 封装报文
+        // 4. 封装报文
         RequestPayload requestPayload = RequestPayload.builder()
                 .path(path)
                 .methodName(method.getName())
@@ -76,7 +74,7 @@ public class RpcClientInvocationHandler implements InvocationHandler {
                 .returnType(method.getReturnType())
                 .build();
 
-        // 6. 创建一个请求
+        // 5. 创建一个请求
         RpcRequest request = RpcRequest.builder()
                 .requestId(RpcBootstrap.getInstance().getIdGenerator().getId())
                 .compressionType(RpcBootstrap.getInstance().getCompressor())
@@ -86,8 +84,11 @@ public class RpcClientInvocationHandler implements InvocationHandler {
                 .requestPayload(requestPayload)
                 .build();
 
-        // 7. 将请求存入本地线程
+        // 6. 将请求存入本地线程
         RpcRequestHolder.set(request);
+
+        // 7. 尝试使用服务发现的地址获取一个Channel连接
+        Channel channel = getChannel(address);
 
         try {
             // 8. 异步发送报文
@@ -102,15 +103,13 @@ public class RpcClientInvocationHandler implements InvocationHandler {
                     }
                 });
                 // 这里的completableFuture类似一个channel的作用，用来传递通知
-                Object result = completableFuture.get(waitTimeMillis, TimeUnit.MILLISECONDS);
-                breaker.recordSuccessRequest();
-                return result;
+                return completableFuture.get(waitTimeMillis, TimeUnit.MILLISECONDS);
             } else {
-                throw new MethodExecutionException("服务调用方处于离线状态");
+                throw new MethodExecutionException("服务方处于离线状态");
             }
         } catch (ExecutionException | InterruptedException | TimeoutException e) {
             breaker.recordErrorRequest();
-            throw new MethodExecutionException("服务调用失败");
+            throw new MethodExecutionException("服务调用失败：调用超时或服务方离线");
         } finally {
             RpcRequestHolder.remove();
         }
@@ -138,7 +137,11 @@ public class RpcClientInvocationHandler implements InvocationHandler {
                         channelFuture.complete(promise.channel());
                     } else if (!promise.isSuccess()) {
                         log.info("客户端连接失败");
-                        channelFuture.completeExceptionally(promise.cause());
+                        channelFuture.exceptionally(err -> {
+                            log.error("Exception requestId={}", RpcRequestHolder.get().getRequestId(), ExceptionUtil.extractRealException(err));
+                            throw new NetworkException("获取通道时发生了异常。");
+                        });
+                        // channelFuture.completeExceptionally(promise.cause());
                     }
                 });
 
